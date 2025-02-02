@@ -79,17 +79,71 @@ def analyze():
         logging.error(f"Unexpected error in analyze: {str(e)}")
         return jsonify({'error': '이력서 분석 중 오류가 발생했습니다.'}), 500
 
+def find_placeholder_by_text(slide, text_to_find):
+    """템플릿 슬라이드에서 특정 텍스트가 포함된 placeholder를 찾습니다."""
+    for shape in slide.shapes:
+        if hasattr(shape, "text") and text_to_find.lower() in shape.text.lower():
+            return shape
+    return None
+
 def generate_portfolio(analysis_result, template_path=None):
     try:
         # Use template if available, otherwise create new presentation
         if template_path and os.path.exists(template_path):
             prs = Presentation(template_path)
             logging.info("템플릿 파일을 사용하여 포트폴리오 생성")
+
+            # 각 경력 정보에 대해
+            for exp in analysis_result['work_experience']:
+                # 템플릿의 각 슬라이드를 순회하며 적절한 위치 찾기
+                for slide in prs.slides:
+                    # 회사 정보를 입력할 placeholder 찾기
+                    company_shape = find_placeholder_by_text(slide, "회사명")
+                    if company_shape:
+                        company_shape.text = exp['company']
+
+                    # 팀 정보를 입력할 placeholder 찾기
+                    team_shape = find_placeholder_by_text(slide, "팀명")
+                    if team_shape:
+                        team_shape.text = exp['team']
+
+                    # 기간 정보를 입력할 placeholder 찾기
+                    period_shape = find_placeholder_by_text(slide, "기간")
+                    if period_shape:
+                        period_shape.text = f"{exp['start_date']} ~ {exp['end_date']}"
+
+                    # 프로젝트 정보를 입력할 placeholder 찾기
+                    for resp in exp['responsibilities']:
+                        project_shape = find_placeholder_by_text(slide, "프로젝트")
+                        if project_shape:
+                            # 프로젝트 상세 정보 입력
+                            text_frame = project_shape.text_frame
+                            text_frame.clear()  # 기존 텍스트 삭제
+
+                            p = text_frame.paragraphs[0]
+                            p.text = resp['project']
+
+                            # 업무 내용 추가
+                            p = text_frame.add_paragraph()
+                            p.text = "주요 업무:"
+                            for detail in resp['details']:
+                                p = text_frame.add_paragraph()
+                                p.text = f"• {detail}"
+                                p.level = 1
+
+                            # 성과 추가
+                            p = text_frame.add_paragraph()
+                            p.text = "\n성과:"
+                            for result in resp['results']:
+                                p = text_frame.add_paragraph()
+                                p.text = f"• {result}"
+                                p.level = 1
         else:
+            # 템플릿이 없는 경우 새로운 프레젠테이션 생성
             prs = Presentation()
             logging.info("새로운 포트폴리오 생성")
 
-            # Create title slide only for new presentation
+            # Create title slide
             title_slide_layout = prs.slide_layouts[0]
             slide = prs.slides.add_slide(title_slide_layout)
             title = slide.shapes.title
@@ -97,30 +151,30 @@ def generate_portfolio(analysis_result, template_path=None):
             title.text = "포트폴리오"
             subtitle.text = f"{analysis_result['work_experience'][0]['company']}"
 
-        # Add experience slides
-        for exp in analysis_result['work_experience']:
-            for resp in exp['responsibilities']:
-                bullet_slide_layout = prs.slide_layouts[1]
-                slide = prs.slides.add_slide(bullet_slide_layout)
+            # Add experience slides
+            for exp in analysis_result['work_experience']:
+                for resp in exp['responsibilities']:
+                    bullet_slide_layout = prs.slide_layouts[1]
+                    slide = prs.slides.add_slide(bullet_slide_layout)
 
-                title = slide.shapes.title
-                body = slide.placeholders[1]
+                    title = slide.shapes.title
+                    body = slide.placeholders[1]
 
-                title.text = resp['project']
-                tf = body.text_frame
+                    title.text = resp['project']
+                    tf = body.text_frame
 
-                tf.text = "주요 업무"
-                for detail in resp['details']:
+                    tf.text = "주요 업무"
+                    for detail in resp['details']:
+                        p = tf.add_paragraph()
+                        p.text = detail
+                        p.level = 1
+
                     p = tf.add_paragraph()
-                    p.text = detail
-                    p.level = 1
-
-                p = tf.add_paragraph()
-                p.text = "\n성과"
-                for result in resp['results']:
-                    p = tf.add_paragraph()
-                    p.text = result
-                    p.level = 1
+                    p.text = "\n성과"
+                    for result in resp['results']:
+                        p = tf.add_paragraph()
+                        p.text = result
+                        p.level = 1
 
         output_path = os.path.join(OUTPUT_FOLDER, 'portfolio.pptx')
         prs.save(output_path)
