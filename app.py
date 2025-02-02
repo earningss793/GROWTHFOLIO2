@@ -79,12 +79,44 @@ def analyze():
         logging.error(f"Unexpected error in analyze: {str(e)}")
         return jsonify({'error': '이력서 분석 중 오류가 발생했습니다.'}), 500
 
-def find_placeholder_by_text(slide, text_to_find):
-    """템플릿 슬라이드에서 특정 텍스트가 포함된 placeholder를 찾습니다."""
+def find_placeholder_by_text(slide, placeholder_text):
+    """템플릿 슬라이드에서 특정 플레이스홀더가 포함된 shape를 찾습니다."""
     for shape in slide.shapes:
-        if hasattr(shape, "text") and text_to_find.lower() in shape.text.lower():
-            return shape
+        if hasattr(shape, "text"):
+            # {{placeholder}} 형식의 텍스트를 찾음
+            if "{{" + placeholder_text + "}}" in shape.text:
+                return shape
     return None
+
+def replace_placeholders(text_frame, analysis_data):
+    """텍스트 프레임 내의 플레이스홀더를 실제 데이터로 대체합니다."""
+    if not text_frame:
+        return
+
+    for paragraph in text_frame.paragraphs:
+        if "{{company}}" in paragraph.text:
+            paragraph.text = paragraph.text.replace("{{company}}", analysis_data.get('company', ''))
+        if "{{team}}" in paragraph.text:
+            paragraph.text = paragraph.text.replace("{{team}}", analysis_data.get('team', ''))
+        if "{{project}}" in paragraph.text:
+            paragraph.text = paragraph.text.replace("{{project}}", analysis_data.get('project', ''))
+
+        # details와 results는 리스트이므로 bullet point로 처리
+        if "{{details}}" in paragraph.text:
+            base_text = paragraph.text.split("{{details}}")[0]
+            paragraph.text = base_text
+            for detail in analysis_data.get('details', []):
+                new_paragraph = text_frame.add_paragraph()
+                new_paragraph.text = f"• {detail}"
+                new_paragraph.level = paragraph.level + 1
+
+        if "{{results}}" in paragraph.text:
+            base_text = paragraph.text.split("{{results}}")[0]
+            paragraph.text = base_text
+            for result in analysis_data.get('results', []):
+                new_paragraph = text_frame.add_paragraph()
+                new_paragraph.text = f"• {result}"
+                new_paragraph.level = paragraph.level + 1
 
 def generate_portfolio(analysis_result, template_path=None):
     try:
@@ -95,49 +127,29 @@ def generate_portfolio(analysis_result, template_path=None):
 
             # 각 경력 정보에 대해
             for exp in analysis_result['work_experience']:
-                # 템플릿의 각 슬라이드를 순회하며 적절한 위치 찾기
+                # 템플릿의 각 슬라이드를 순회하며 플레이스홀더 찾기
                 for slide in prs.slides:
-                    # 회사 정보를 입력할 placeholder 찾기
-                    company_shape = find_placeholder_by_text(slide, "회사명")
-                    if company_shape:
-                        company_shape.text = exp['company']
+                    # 회사 정보, 팀 정보 등 기본 정보 처리
+                    for shape in slide.shapes:
+                        if hasattr(shape, "text_frame"):
+                            replace_placeholders(shape.text_frame, {
+                                'company': exp['company'],
+                                'team': exp['team'],
+                                'project': '',  # 프로젝트는 responsibilities에서 처리
+                                'details': [],
+                                'results': []
+                            })
 
-                    # 팀 정보를 입력할 placeholder 찾기
-                    team_shape = find_placeholder_by_text(slide, "팀명")
-                    if team_shape:
-                        team_shape.text = exp['team']
-
-                    # 기간 정보를 입력할 placeholder 찾기
-                    period_shape = find_placeholder_by_text(slide, "기간")
-                    if period_shape:
-                        period_shape.text = f"{exp['start_date']} ~ {exp['end_date']}"
-
-                    # 프로젝트 정보를 입력할 placeholder 찾기
+                    # 프로젝트별 상세 정보 처리
                     for resp in exp['responsibilities']:
-                        project_shape = find_placeholder_by_text(slide, "프로젝트")
-                        if project_shape:
-                            # 프로젝트 상세 정보 입력
-                            text_frame = project_shape.text_frame
-                            text_frame.clear()  # 기존 텍스트 삭제
+                        for shape in slide.shapes:
+                            if hasattr(shape, "text_frame"):
+                                replace_placeholders(shape.text_frame, {
+                                    'project': resp['project'],
+                                    'details': resp['details'],
+                                    'results': resp['results']
+                                })
 
-                            p = text_frame.paragraphs[0]
-                            p.text = resp['project']
-
-                            # 업무 내용 추가
-                            p = text_frame.add_paragraph()
-                            p.text = "주요 업무:"
-                            for detail in resp['details']:
-                                p = text_frame.add_paragraph()
-                                p.text = f"• {detail}"
-                                p.level = 1
-
-                            # 성과 추가
-                            p = text_frame.add_paragraph()
-                            p.text = "\n성과:"
-                            for result in resp['results']:
-                                p = text_frame.add_paragraph()
-                                p.text = f"• {result}"
-                                p.level = 1
         else:
             # 템플릿이 없는 경우 새로운 프레젠테이션 생성
             prs = Presentation()
