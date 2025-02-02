@@ -3,6 +3,8 @@ import docx
 import json
 import os
 import logging
+import anthropic
+from anthropic import Anthropic
 
 def extract_text_from_file(filepath):
     logging.debug(f"Processing file: {filepath}")
@@ -94,17 +96,44 @@ def analyze_resume(client, text_content):
     """
 
     try:
-        response = client.messages.create(
-            model="claude-3-5-sonnet-20241022",
-            max_tokens=2000,
-            messages=[
-                {
-                    "role": "user",
-                    "content": prompt
-                }
-            ]
-        )
-        return json.loads(response.content)
+        logging.info("Claude API 호출 시작")
+        logging.debug(f"텍스트 길이: {len(text_content)} 글자")
+
+        # API 호출 시도
+        try:
+            response = client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=2000,
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt
+                    }
+                ]
+            )
+            logging.info("Claude API 호출 성공")
+
+            # 응답 검증
+            if not response or not response.content:
+                raise ValueError("API 응답이 비어있습니다")
+
+            # JSON 파싱 시도
+            try:
+                result = json.loads(response.content)
+                if not result.get('work_experience'):
+                    raise ValueError("필수 데이터가 누락되었습니다")
+                return result
+            except json.JSONDecodeError as je:
+                logging.error(f"JSON 파싱 오류: {str(je)}")
+                raise ValueError("API 응답을 파싱할 수 없습니다")
+
+        except anthropic.APIError as ae:
+            logging.error(f"Claude API 오류: {str(ae)}")
+            raise ValueError("API 서버 오류가 발생했습니다")
+        except anthropic.RateLimitError:
+            logging.error("API 호출 한도 초과")
+            raise ValueError("잠시 후 다시 시도해주세요 (호출 한도 초과)")
+
     except Exception as e:
-        logging.error(f"Claude API 호출 중 오류 발생: {str(e)}")
-        raise ValueError("이력서 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")
+        logging.error(f"이력서 분석 중 오류 발생: {str(e)}")
+        raise ValueError(f"이력서 분석 중 오류가 발생했습니다: {str(e)}")
