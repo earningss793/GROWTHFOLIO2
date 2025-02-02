@@ -79,76 +79,44 @@ def analyze():
         logging.error(f"Unexpected error in analyze: {str(e)}")
         return jsonify({'error': '이력서 분석 중 오류가 발생했습니다.'}), 500
 
-def find_placeholder_by_text(slide, placeholder_text):
-    """템플릿 슬라이드에서 특정 플레이스홀더가 포함된 shape를 찾습니다."""
-    for shape in slide.shapes:
-        if hasattr(shape, "text"):
-            # {{placeholder}} 형식의 텍스트를 찾음
-            if "{{" + placeholder_text + "}}" in shape.text:
-                return shape
-    return None
-
-def replace_placeholders(text_frame, analysis_data):
-    """텍스트 프레임 내의 플레이스홀더를 실제 데이터로 대체합니다."""
-    if not text_frame:
-        return
-
-    for paragraph in text_frame.paragraphs:
-        if "{{company}}" in paragraph.text:
-            paragraph.text = paragraph.text.replace("{{company}}", analysis_data.get('company', ''))
-        if "{{team}}" in paragraph.text:
-            paragraph.text = paragraph.text.replace("{{team}}", analysis_data.get('team', ''))
-        if "{{project}}" in paragraph.text:
-            paragraph.text = paragraph.text.replace("{{project}}", analysis_data.get('project', ''))
-
-        # details와 results는 리스트이므로 bullet point로 처리
-        if "{{details}}" in paragraph.text:
-            base_text = paragraph.text.split("{{details}}")[0]
-            paragraph.text = base_text
-            for detail in analysis_data.get('details', []):
-                new_paragraph = text_frame.add_paragraph()
-                new_paragraph.text = f"• {detail}"
-                new_paragraph.level = paragraph.level + 1
-
-        if "{{results}}" in paragraph.text:
-            base_text = paragraph.text.split("{{results}}")[0]
-            paragraph.text = base_text
-            for result in analysis_data.get('results', []):
-                new_paragraph = text_frame.add_paragraph()
-                new_paragraph.text = f"• {result}"
-                new_paragraph.level = paragraph.level + 1
-
 def generate_portfolio(analysis_result, template_path=None):
     try:
-        # Use template if available, otherwise create new presentation
         if template_path and os.path.exists(template_path):
+            # 템플릿 파일 로드
             prs = Presentation(template_path)
             logging.info("템플릿 파일을 사용하여 포트폴리오 생성")
 
-            # 각 경력 정보에 대해
+            # 분석 결과를 슬라이드별 데이터 리스트로 변환
+            data_list = []
             for exp in analysis_result['work_experience']:
-                # 템플릿의 각 슬라이드를 순회하며 플레이스홀더 찾기
-                for slide in prs.slides:
-                    # 회사 정보, 팀 정보 등 기본 정보 처리
-                    for shape in slide.shapes:
-                        if hasattr(shape, "text_frame"):
-                            replace_placeholders(shape.text_frame, {
-                                'company': exp['company'],
-                                'team': exp['team'],
-                                'project': '',  # 프로젝트는 responsibilities에서 처리
-                                'details': [],
-                                'results': []
-                            })
+                for resp in exp['responsibilities']:
+                    data = {
+                        "company": exp['company'],
+                        "team": exp['team'],
+                        "project": resp['project'],
+                        "details": "\n".join(f"• {detail}" for detail in resp['details']),
+                        "results": "\n".join(f"• {result}" for result in resp['results'])
+                    }
+                    data_list.append(data)
 
-                    # 프로젝트별 상세 정보 처리
-                    for resp in exp['responsibilities']:
-                        for shape in slide.shapes:
-                            if hasattr(shape, "text_frame"):
-                                replace_placeholders(shape.text_frame, {
-                                    'project': resp['project'],
-                                    'details': resp['details'],
-                                    'results': resp['results']
-                                })
+            # 슬라이드별 데이터 삽입
+            for idx, slide in enumerate(prs.slides):
+                if idx < len(data_list):  # 데이터가 있는 경우에만 처리
+                    data = data_list[idx]  # 현재 슬라이드에 삽입할 데이터
+                    for shape in slide.shapes:
+                        if shape.has_text_frame:
+                            text_frame = shape.text_frame
+                            text = text_frame.text
+
+                            # 각 플레이스홀더를 데이터로 치환
+                            for key, value in data.items():
+                                placeholder = f"{{{{{key}}}}}"
+                                if placeholder in text:
+                                    new_text = text.replace(placeholder, str(value))
+                                    if text != new_text:  # 변경사항이 있는 경우만 업데이트
+                                        text_frame.clear()  # 기존 텍스트 삭제
+                                        p = text_frame.paragraphs[0]
+                                        p.text = new_text
 
         else:
             # 템플릿이 없는 경우 새로운 프레젠테이션 생성
