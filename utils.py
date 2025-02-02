@@ -113,18 +113,33 @@ def analyze_resume(client, text_content):
             )
             logging.info("Claude API 호출 성공")
 
-            # 응답 검증
-            if not response or not response.content:
+            # 응답 검증 및 처리
+            if not response or not hasattr(response, 'content'):
                 raise ValueError("API 응답이 비어있습니다")
 
-            # JSON 파싱 시도
+            # 로그에 응답 내용 출력 (디버깅용)
+            logging.debug(f"API 응답 내용: {response.content}")
+
+            # content 필드에서 첫 번째 메시지 추출
+            content = response.content[0].text if isinstance(response.content, list) else response.content
+
             try:
-                result = json.loads(response.content)
+                # JSON 문자열 시작과 끝 위치 찾기
+                json_start = content.find('{')
+                json_end = content.rfind('}') + 1
+                if json_start == -1 or json_end == 0:
+                    raise ValueError("JSON 데이터를 찾을 수 없습니다")
+
+                json_str = content[json_start:json_end]
+                result = json.loads(json_str)
+
                 if not result.get('work_experience'):
                     raise ValueError("필수 데이터가 누락되었습니다")
                 return result
+
             except json.JSONDecodeError as je:
                 logging.error(f"JSON 파싱 오류: {str(je)}")
+                logging.error(f"파싱 시도한 문자열: {json_str}")
                 raise ValueError("API 응답을 파싱할 수 없습니다")
 
         except anthropic.APIError as ae:
