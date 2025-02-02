@@ -29,7 +29,6 @@ def extract_text_from_file(filepath):
     except Exception as e:
         logging.error(f"파일 처리 중 오류 발생: {str(e)}")
         raise
-
 def extract_from_pdf(filepath):
     try:
         text = ""
@@ -71,28 +70,45 @@ def extract_from_txt(filepath):
 
 def analyze_resume(client, text_content):
     # the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
-    prompt = f"""분석할 이력서 내용입니다. 다음 형식에 맞춰 JSON으로 변환해주세요:
+    prompt = f"""분석할 이력서 내용입니다. 다음 형식에 맞춰 JSON으로 변환해주세요.
+    각 프로젝트별로 구체적인 업무 내용 5가지와 수치화된 성과 3가지를 포함해야 합니다:
 
     {text_content}
 
-    JSON 형식:
+    다음은 원하는 출력 형식의 예시입니다:
     {{
         "work_experience": [
             {{
-                "start_date": "시작일",
-                "end_date": "종료일",
-                "company": "회사명",
-                "team": "팀명",
+                "start_date": "2023.10",
+                "end_date": "2024.08",
+                "company": "빅플래닛메이드엔터",
+                "team": "비주얼컨텐츠팀",
                 "responsibilities": [
                     {{
-                        "project": "프로젝트명",
-                        "details": ["업무내용1", "업무내용2", ...],
-                        "results": ["성과1", "성과2", ...]
+                        "project": "프로젝트 1: 앨범 프로모션 컨텐츠",
+                        "details": [
+                            "아티스트 앨범 발매에 맞춘 컨텐츠 기획 및 제작.",
+                            "앨범의 타이틀곡에 대한 홍보 영상 제작 및 배포.",
+                            "소셜 미디어용 짧은 숏폼 컨텐츠 제작.",
+                            "앨범 프로모션 관련 행사 자료 시각화 및 디자인.",
+                            "팬들과 소통할 수 있는 디지털 이벤트 기획."
+                        ],
+                        "results": [
+                            "앨범 프로모션 컨텐츠 조회수 100만 회 기록.",
+                            "SNS 채널 평균 CTR 12.5% 달성.",
+                            "담당 기간 전 대비 앨범 매출 25% 증가."
+                        ]
                     }}
                 ]
             }}
         ]
     }}
+
+    주의사항:
+    1. 각 프로젝트의 업무 내용(details)은 반드시 5개의 구체적인 문장으로 작성해주세요.
+    2. 각 프로젝트의 성과(results)는 반드시 3개의 수치화된 결과로 작성해주세요.
+    3. 입력된 내용을 바탕으로 현실적인 수치와 성과를 추정하여 작성해주세요.
+    4. 모든 프로젝트를 분리하여 각각 자세히 분석해주세요.
     """
 
     try:
