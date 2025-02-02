@@ -29,10 +29,22 @@ client = anthropic.Anthropic(
 )
 
 def allowed_file(filename):
-    # 파일명에서 확장자 추출 (마지막 . 이후)
-    extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
-    logging.debug(f"파일 확장자 검사: {filename} -> {extension}")
-    return extension in ALLOWED_EXTENSIONS
+    try:
+        if '.' not in filename:
+            logging.warning(f"파일에 확장자가 없습니다: {filename}")
+            return False
+
+        extension = filename.rsplit('.', 1)[1].lower()
+        logging.debug(f"파일 확장자 검사: {filename} -> {extension}")
+
+        is_allowed = extension in ALLOWED_EXTENSIONS
+        if not is_allowed:
+            logging.warning(f"지원하지 않는 파일 형식입니다: {extension}")
+
+        return is_allowed
+    except Exception as e:
+        logging.error(f"파일 확장자 검사 중 오류 발생: {str(e)}")
+        return False
 
 @app.route('/')
 def index():
@@ -49,10 +61,16 @@ def upload_file():
 
     try:
         if file and allowed_file(file.filename):
-            # 파일명 보안 처리 및 원본 확장자 유지
-            original_extension = os.path.splitext(file.filename)[1]
-            base_filename = secure_filename(os.path.splitext(file.filename)[0])
-            filename = f"{base_filename}{original_extension}"
+            # 파일명 보안 처리 및 원본 확장자 보존
+            original_filename = file.filename
+            extension = original_filename.rsplit('.', 1)[1].lower()
+            base_filename = secure_filename(original_filename.rsplit('.', 1)[0])
+
+            if not base_filename:  # secure_filename이 빈 문자열을 반환한 경우
+                base_filename = 'uploaded_file'
+
+            filename = f"{base_filename}.{extension}"
+            logging.debug(f"처리된 파일명: {original_filename} -> {filename}")
 
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
@@ -77,7 +95,7 @@ def upload_file():
                                 analysis=analysis_result,
                                 pptx_path=pptx_path)
 
-        return jsonify({'error': '허용되지 않는 파일 형식입니다.'}), 400
+        return jsonify({'error': '지원하지 않는 파일 형식입니다.'}), 400
 
     except ValueError as e:
         logging.error(f"Value error in upload_file: {str(e)}")
