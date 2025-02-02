@@ -140,34 +140,50 @@ def generate_portfolio(analysis_result, template_path):
         for idx, slide in enumerate(prs.slides):
             if idx < len(data_list):  # 데이터가 있는 경우에만 처리
                 data = data_list[idx]  # 현재 슬라이드에 삽입할 데이터
-                processed_placeholders = set()  # 이미 처리된 플레이스홀더 추적
+                processed_shapes = set()  # 이미 처리된 shape 추적
 
+                # 먼저 제목 shape 찾아서 처리
+                if slide.shapes.title:
+                    title_shape = slide.shapes.title
+                    if title_shape not in processed_shapes and title_shape.has_text_frame:
+                        text = title_shape.text_frame.text
+                        if "{{project}}" in text:
+                            title_shape.text_frame.text = text.replace("{{project}}", data["project"])
+                            processed_shapes.add(title_shape)
+                            for run in title_shape.text_frame.paragraphs[0].runs:
+                                run.font.size = Pt(10)
+
+                # 그 다음 나머지 shape들 처리
                 for shape in slide.shapes:
-                    if shape.has_text_frame:
+                    if shape not in processed_shapes and shape.has_text_frame:
                         text_frame = shape.text_frame
-                        text = text_frame.text
+                        original_text = text_frame.text
 
-                        # 각 플레이스홀더를 데이터로 치환 (한 번만)
+                        # 각 플레이스홀더 한 번만 교체
                         for key, value in data.items():
                             placeholder = f"{{{{{key}}}}}"
-                            if placeholder in text and placeholder not in processed_placeholders:
-                                new_text = text.replace(placeholder, str(value))
-                                if text != new_text:  # 변경사항이 있는 경우만 업데이트
-                                    text_frame.clear()  # 기존 텍스트 삭제
-                                    p = text_frame.paragraphs[0]
-                                    p.text = new_text
-                                    # 폰트 크기를 10pt로 설정
-                                    for run in p.runs:
-                                        run.font.size = Pt(10)
-                                    # 추가되는 단락들의 폰트 크기도 설정
-                                    if "\n" in new_text:
-                                        for line in new_text.split("\n")[1:]:
-                                            if line.strip():
-                                                new_p = text_frame.add_paragraph()
-                                                new_p.text = line
-                                                for run in new_p.runs:
-                                                    run.font.size = Pt(10)
-                                processed_placeholders.add(placeholder)  # 처리된 플레이스홀더 기록
+                            if placeholder in original_text:
+                                text_frame.clear()
+                                p = text_frame.paragraphs[0]
+                                p.text = original_text.replace(placeholder, str(value))
+
+                                # 폰트 크기 설정
+                                for run in p.runs:
+                                    run.font.size = Pt(10)
+
+                                # 줄바꿈이 있는 경우 추가 단락 생성
+                                if "\n" in p.text:
+                                    lines = p.text.split("\n")
+                                    p.text = lines[0]
+                                    for line in lines[1:]:
+                                        if line.strip():
+                                            new_p = text_frame.add_paragraph()
+                                            new_p.text = line
+                                            for run in new_p.runs:
+                                                run.font.size = Pt(10)
+
+                                processed_shapes.add(shape)
+                                break  # 한 shape당 하나의 플레이스홀더만 처리
 
         output_path = os.path.join(OUTPUT_FOLDER, 'portfolio.pptx')
         prs.save(output_path)
