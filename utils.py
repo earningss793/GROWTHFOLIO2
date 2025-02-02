@@ -1,44 +1,78 @@
 import PyPDF2
 import docx
 import json
+import os
+import logging
 
 def extract_text_from_file(filepath):
-    file_extension = filepath.split('.')[-1].lower()
-    
-    if file_extension == 'pdf':
-        return extract_from_pdf(filepath)
-    elif file_extension == 'docx':
-        return extract_from_docx(filepath)
-    elif file_extension == 'txt':
-        return extract_from_txt(filepath)
-    else:
-        raise ValueError("Unsupported file format")
+    logging.debug(f"Processing file: {filepath}")
+
+    # 파일 존재 여부 확인
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(f"파일을 찾을 수 없습니다: {filepath}")
+
+    # 파일 확장자 확인 (대소문자 구분 없이)
+    file_extension = os.path.splitext(filepath)[1].lower().lstrip('.')
+    logging.debug(f"File extension detected: {file_extension}")
+
+    try:
+        if file_extension == 'pdf':
+            return extract_from_pdf(filepath)
+        elif file_extension == 'docx':
+            return extract_from_docx(filepath)
+        elif file_extension == 'txt':
+            return extract_from_txt(filepath)
+        else:
+            raise ValueError(f"지원하지 않는 파일 형식입니다: {file_extension}")
+    except Exception as e:
+        logging.error(f"파일 처리 중 오류 발생: {str(e)}")
+        raise
 
 def extract_from_pdf(filepath):
-    text = ""
-    with open(filepath, 'rb') as file:
-        pdf_reader = PyPDF2.PdfReader(file)
-        for page in pdf_reader.pages:
-            text += page.extract_text()
-    return text
+    try:
+        text = ""
+        with open(filepath, 'rb') as file:
+            pdf_reader = PyPDF2.PdfReader(file)
+            for page in pdf_reader.pages:
+                text += page.extract_text()
+        return text
+    except Exception as e:
+        logging.error(f"PDF 파일 처리 중 오류 발생: {str(e)}")
+        raise ValueError(f"PDF 파일 처리 중 오류가 발생했습니다: {str(e)}")
 
 def extract_from_docx(filepath):
-    doc = docx.Document(filepath)
-    text = []
-    for para in doc.paragraphs:
-        text.append(para.text)
-    return '\n'.join(text)
+    try:
+        doc = docx.Document(filepath)
+        text = []
+        for para in doc.paragraphs:
+            text.append(para.text)
+        return '\n'.join(text)
+    except Exception as e:
+        logging.error(f"DOCX 파일 처리 중 오류 발생: {str(e)}")
+        raise ValueError(f"DOCX 파일 처리 중 오류가 발생했습니다: {str(e)}")
 
 def extract_from_txt(filepath):
-    with open(filepath, 'r', encoding='utf-8') as file:
-        return file.read()
+    try:
+        with open(filepath, 'r', encoding='utf-8') as file:
+            return file.read()
+    except UnicodeDecodeError:
+        # UTF-8로 읽기 실패시 다른 인코딩 시도
+        try:
+            with open(filepath, 'r', encoding='cp949') as file:
+                return file.read()
+        except Exception as e:
+            logging.error(f"텍스트 파일 처리 중 인코딩 오류 발생: {str(e)}")
+            raise ValueError("텍스트 파일의 인코딩을 확인해주세요.")
+    except Exception as e:
+        logging.error(f"텍스트 파일 처리 중 오류 발생: {str(e)}")
+        raise ValueError(f"텍스트 파일 처리 중 오류가 발생했습니다: {str(e)}")
 
 def analyze_resume(client, text_content):
     # the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
     prompt = f"""분석할 이력서 내용입니다. 다음 형식에 맞춰 JSON으로 변환해주세요:
-    
+
     {text_content}
-    
+
     JSON 형식:
     {{
         "work_experience": [
@@ -58,16 +92,19 @@ def analyze_resume(client, text_content):
         ]
     }}
     """
-    
-    response = client.messages.create(
-        model="claude-3-5-sonnet-20241022",
-        max_tokens=2000,
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
-    )
-    
-    return json.loads(response.content)
+
+    try:
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=2000,
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ]
+        )
+        return json.loads(response.content)
+    except Exception as e:
+        logging.error(f"Claude API 호출 중 오류 발생: {str(e)}")
+        raise ValueError("이력서 분석 중 오류가 발생했습니다. 잠시 후 다시 시도해주세요.")

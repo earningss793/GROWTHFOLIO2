@@ -39,80 +39,99 @@ def index():
 def upload_file():
     if 'file' not in request.files:
         return jsonify({'error': '파일이 선택되지 않았습니다.'}), 400
-    
+
     file = request.files['file']
     if file.filename == '':
         return jsonify({'error': '파일이 선택되지 않았습니다.'}), 400
 
-    if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-        file.save(filepath)
-        
-        try:
+    try:
+        if file and allowed_file(file.filename):
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+            file.save(filepath)
+
+            logging.info(f"파일 업로드 완료: {filename}")
+
             # Extract text from file
             text_content = extract_text_from_file(filepath)
-            
+            logging.debug(f"텍스트 추출 완료: {len(text_content)} 글자")
+
+            if not text_content.strip():
+                raise ValueError("파일에서 텍스트를 추출할 수 없습니다.")
+
             # Analyze resume using Claude API
             analysis_result = analyze_resume(client, text_content)
-            
+
             # Generate PowerPoint
             pptx_path = generate_portfolio(analysis_result)
-            
+
             return render_template('result.html', 
-                                 analysis=analysis_result,
-                                 pptx_path=pptx_path)
-        
-        except Exception as e:
-            logging.error(f"Error processing file: {str(e)}")
-            return jsonify({'error': '파일 처리 중 오류가 발생했습니다.'}), 500
-        
-    return jsonify({'error': '허용되지 않는 파일 형식입니다.'}), 400
+                                analysis=analysis_result,
+                                pptx_path=pptx_path)
+
+        return jsonify({'error': '허용되지 않는 파일 형식입니다.'}), 400
+
+    except ValueError as e:
+        logging.error(f"Value error in upload_file: {str(e)}")
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        logging.error(f"Unexpected error in upload_file: {str(e)}")
+        return jsonify({'error': '파일 처리 중 오류가 발생했습니다.'}), 500
 
 def generate_portfolio(analysis_result):
-    prs = Presentation()
-    
-    # Title slide
-    title_slide_layout = prs.slide_layouts[0]
-    slide = prs.slides.add_slide(title_slide_layout)
-    title = slide.shapes.title
-    subtitle = slide.placeholders[1]
-    title.text = "포트폴리오"
-    subtitle.text = f"{analysis_result['work_experience'][0]['company']}"
-    
-    # Experience slides
-    for exp in analysis_result['work_experience']:
-        for resp in exp['responsibilities']:
-            bullet_slide_layout = prs.slide_layouts[1]
-            slide = prs.slides.add_slide(bullet_slide_layout)
-            
-            title = slide.shapes.title
-            body = slide.placeholders[1]
-            
-            title.text = resp['project']
-            tf = body.text_frame
-            
-            tf.text = "주요 업무"
-            for detail in resp['details']:
+    try:
+        prs = Presentation()
+
+        # Title slide
+        title_slide_layout = prs.slide_layouts[0]
+        slide = prs.slides.add_slide(title_slide_layout)
+        title = slide.shapes.title
+        subtitle = slide.placeholders[1]
+        title.text = "포트폴리오"
+        subtitle.text = f"{analysis_result['work_experience'][0]['company']}"
+
+        # Experience slides
+        for exp in analysis_result['work_experience']:
+            for resp in exp['responsibilities']:
+                bullet_slide_layout = prs.slide_layouts[1]
+                slide = prs.slides.add_slide(bullet_slide_layout)
+
+                title = slide.shapes.title
+                body = slide.placeholders[1]
+
+                title.text = resp['project']
+                tf = body.text_frame
+
+                tf.text = "주요 업무"
+                for detail in resp['details']:
+                    p = tf.add_paragraph()
+                    p.text = detail
+                    p.level = 1
+
                 p = tf.add_paragraph()
-                p.text = detail
-                p.level = 1
-                
-            p = tf.add_paragraph()
-            p.text = "\n성과"
-            for result in resp['results']:
-                p = tf.add_paragraph()
-                p.text = result
-                p.level = 1
-    
-    output_path = os.path.join(app.config['OUTPUT_FOLDER'], 'portfolio.pptx')
-    prs.save(output_path)
-    return output_path
+                p.text = "\n성과"
+                for result in resp['results']:
+                    p = tf.add_paragraph()
+                    p.text = result
+                    p.level = 1
+
+        output_path = os.path.join(app.config['OUTPUT_FOLDER'], 'portfolio.pptx')
+        prs.save(output_path)
+        logging.info("포트폴리오 생성 완료")
+        return output_path
+
+    except Exception as e:
+        logging.error(f"포트폴리오 생성 중 오류 발생: {str(e)}")
+        raise ValueError("포트폴리오 생성 중 오류가 발생했습니다.")
 
 @app.route('/download/<filename>')
 def download_file(filename):
-    return send_file(os.path.join(app.config['OUTPUT_FOLDER'], filename),
-                    as_attachment=True)
+    try:
+        return send_file(os.path.join(app.config['OUTPUT_FOLDER'], filename),
+                        as_attachment=True)
+    except Exception as e:
+        logging.error(f"파일 다운로드 중 오류 발생: {str(e)}")
+        return jsonify({'error': '파일 다운로드 중 오류가 발생했습니다.'}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
