@@ -2,107 +2,56 @@ import os
 import json
 import anthropic
 from flask import Flask, render_template, request, jsonify, send_file
-from werkzeug.utils import secure_filename
 from pptx import Presentation
-from utils import extract_text_from_file, analyze_resume
+from utils import analyze_resume
 import logging
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# Configure upload folder
-UPLOAD_FOLDER = 'uploads'
+# Configure output folder
 OUTPUT_FOLDER = 'output'
-ALLOWED_EXTENSIONS = {'txt', 'pdf', 'docx'}
 
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
 if not os.path.exists(OUTPUT_FOLDER):
     os.makedirs(OUTPUT_FOLDER)
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB max file size
 
 # Initialize Anthropic client
 client = anthropic.Anthropic(
     api_key=os.getenv('ANTHROPIC_API_KEY')
 )
 
-def allowed_file(filename):
-    try:
-        if '.' not in filename:
-            logging.warning(f"파일에 확장자가 없습니다: {filename}")
-            return False
-
-        extension = filename.rsplit('.', 1)[1].lower()
-        logging.debug(f"파일 확장자 검사: {filename} -> {extension}")
-
-        is_allowed = extension in ALLOWED_EXTENSIONS
-        if not is_allowed:
-            logging.warning(f"지원하지 않는 파일 형식입니다: {extension}")
-
-        return is_allowed
-    except Exception as e:
-        logging.error(f"파일 확장자 검사 중 오류 발생: {str(e)}")
-        return False
-
 @app.route('/')
 def index():
     return render_template('index.html')
 
-@app.route('/upload', methods=['POST'])
-def upload_file():
-    if 'file' not in request.files:
-        return jsonify({'error': '파일이 선택되지 않았습니다.'}), 400
+@app.route('/analyze', methods=['POST'])
+def analyze():
+    if not request.is_json:
+        return jsonify({'error': '잘못된 요청 형식입니다.'}), 400
 
-    file = request.files['file']
-    if file.filename == '':
-        return jsonify({'error': '파일이 선택되지 않았습니다.'}), 400
+    data = request.get_json()
+    resume_text = data.get('resume_text')
+
+    if not resume_text:
+        return jsonify({'error': '이력서 내용이 비어있습니다.'}), 400
 
     try:
-        if file and allowed_file(file.filename):
-            # 파일명 보안 처리 및 원본 확장자 보존
-            original_filename = file.filename
-            extension = original_filename.rsplit('.', 1)[1].lower()
-            base_filename = secure_filename(original_filename.rsplit('.', 1)[0])
+        # Analyze resume using Claude API
+        analysis_result = analyze_resume(client, resume_text)
 
-            if not base_filename:  # secure_filename이 빈 문자열을 반환한 경우
-                base_filename = 'uploaded_file'
+        # Generate PowerPoint
+        pptx_path = generate_portfolio(analysis_result)
 
-            filename = f"{base_filename}.{extension}"
-            logging.debug(f"처리된 파일명: {original_filename} -> {filename}")
-
-            filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-            file.save(filepath)
-
-            logging.info(f"파일 업로드 완료: {filename}")
-            logging.debug(f"저장된 파일 경로: {filepath}")
-
-            # Extract text from file
-            text_content = extract_text_from_file(filepath)
-            logging.debug(f"텍스트 추출 완료: {len(text_content)} 글자")
-
-            if not text_content.strip():
-                raise ValueError("파일에서 텍스트를 추출할 수 없습니다.")
-
-            # Analyze resume using Claude API
-            analysis_result = analyze_resume(client, text_content)
-
-            # Generate PowerPoint
-            pptx_path = generate_portfolio(analysis_result)
-
-            return render_template('result.html', 
-                                analysis=analysis_result,
-                                pptx_path=pptx_path)
-
-        return jsonify({'error': '지원하지 않는 파일 형식입니다.'}), 400
+        return render_template('result.html', 
+                            analysis=analysis_result,
+                            pptx_path=pptx_path)
 
     except ValueError as e:
-        logging.error(f"Value error in upload_file: {str(e)}")
+        logging.error(f"Value error in analyze: {str(e)}")
         return jsonify({'error': str(e)}), 400
     except Exception as e:
-        logging.error(f"Unexpected error in upload_file: {str(e)}")
-        return jsonify({'error': '파일 처리 중 오류가 발생했습니다.'}), 500
+        logging.error(f"Unexpected error in analyze: {str(e)}")
+        return jsonify({'error': '이력서 분석 중 오류가 발생했습니다.'}), 500
 
 def generate_portfolio(analysis_result):
     try:
@@ -141,7 +90,7 @@ def generate_portfolio(analysis_result):
                     p.text = result
                     p.level = 1
 
-        output_path = os.path.join(app.config['OUTPUT_FOLDER'], 'portfolio.pptx')
+        output_path = os.path.join(OUTPUT_FOLDER, 'portfolio.pptx')
         prs.save(output_path)
         logging.info("포트폴리오 생성 완료")
         return output_path
@@ -153,7 +102,7 @@ def generate_portfolio(analysis_result):
 @app.route('/download/<filename>')
 def download_file(filename):
     try:
-        return send_file(os.path.join(app.config['OUTPUT_FOLDER'], filename),
+        return send_file(os.path.join(OUTPUT_FOLDER, filename),
                         as_attachment=True)
     except Exception as e:
         logging.error(f"파일 다운로드 중 오류 발생: {str(e)}")

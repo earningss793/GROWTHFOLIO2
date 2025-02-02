@@ -11,14 +11,15 @@
 <body>
     <div class="container">
         <h1 class="text-center mb-4">이력서 분석 및 포트폴리오 생성</h1>
-        
+
         <div class="upload-container">
-            <form id="upload-form" enctype="multipart/form-data">
-                <input type="file" id="file-input" name="file" class="file-input" accept=".pdf,.docx,.txt">
-                <label for="file-input" class="upload-btn">
-                    파일 선택하기
-                </label>
-                
+            <form id="resume-form">
+                <div class="mb-3">
+                    <label for="resume-text" class="form-label">이력서 내용을 입력해주세요</label>
+                    <textarea class="form-control" id="resume-text" name="resume_text" 
+                              rows="10" placeholder="이력서 내용을 여기에 붙여넣기 해주세요..."></textarea>
+                </div>
+
                 <div class="progress">
                     <div class="progress-bar progress-bar-striped progress-bar-animated" 
                          role="progressbar" 
@@ -27,22 +28,28 @@
                          aria-valuemax="100">
                     </div>
                 </div>
-                
+
                 <div class="alert" role="alert"></div>
-                
+
                 <button type="submit" class="btn btn-primary w-100 mt-3">
                     분석 시작하기
                 </button>
             </form>
         </div>
-        
+
         <div class="mt-4">
-            <h5>지원 파일 형식</h5>
-            <ul>
-                <li>PDF (.pdf)</li>
-                <li>Word 문서 (.docx)</li>
-                <li>텍스트 파일 (.txt)</li>
-            </ul>
+            <h5>입력 형식 예시</h5>
+            <pre class="text-muted">
+회사명: OO 기업
+팀명: 개발팀
+기간: 2023.01 ~ 2023.12
+직무: 프론트엔드 개발자
+
+담당 업무:
+- 웹 애플리케이션 UI/UX 개발
+- 성능 최적화
+- 코드 리팩토링
+            </pre>
         </div>
     </div>
 
