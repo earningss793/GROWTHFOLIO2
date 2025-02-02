@@ -29,7 +29,10 @@ client = anthropic.Anthropic(
 )
 
 def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    # 파일명에서 확장자 추출 (마지막 . 이후)
+    extension = filename.rsplit('.', 1)[1].lower() if '.' in filename else ''
+    logging.debug(f"파일 확장자 검사: {filename} -> {extension}")
+    return extension in ALLOWED_EXTENSIONS
 
 @app.route('/')
 def index():
@@ -46,11 +49,16 @@ def upload_file():
 
     try:
         if file and allowed_file(file.filename):
-            filename = secure_filename(file.filename)
+            # 파일명 보안 처리 및 원본 확장자 유지
+            original_extension = os.path.splitext(file.filename)[1]
+            base_filename = secure_filename(os.path.splitext(file.filename)[0])
+            filename = f"{base_filename}{original_extension}"
+
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
 
             logging.info(f"파일 업로드 완료: {filename}")
+            logging.debug(f"저장된 파일 경로: {filepath}")
 
             # Extract text from file
             text_content = extract_text_from_file(filepath)
