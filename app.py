@@ -2,6 +2,7 @@ import os
 import json
 import anthropic
 from flask import Flask, render_template, request, jsonify, send_file
+from werkzeug.utils import secure_filename
 from pptx import Presentation
 from utils import analyze_resume
 import logging
@@ -9,11 +10,14 @@ import logging
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
-# Configure output folder
+# Configure folders
 OUTPUT_FOLDER = 'output'
+TEMPLATE_FOLDER = 'templates/pptx'
 
-if not os.path.exists(OUTPUT_FOLDER):
-    os.makedirs(OUTPUT_FOLDER)
+# Create necessary folders
+for folder in [OUTPUT_FOLDER, TEMPLATE_FOLDER]:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 # Initialize Anthropic client
 client = anthropic.Anthropic(
@@ -23,6 +27,27 @@ client = anthropic.Anthropic(
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/upload_template', methods=['POST'])
+def upload_template():
+    if 'template' not in request.files:
+        return jsonify({'error': '템플릿 파일이 선택되지 않았습니다.'}), 400
+
+    file = request.files['template']
+    if file.filename == '':
+        return jsonify({'error': '템플릿 파일이 선택되지 않았습니다.'}), 400
+
+    if not file.filename.endswith('.pptx'):
+        return jsonify({'error': 'PPTX 파일만 업로드 가능합니다.'}), 400
+
+    try:
+        filename = secure_filename('template.pptx')
+        filepath = os.path.join(TEMPLATE_FOLDER, filename)
+        file.save(filepath)
+        return jsonify({'message': '템플릿이 성공적으로 업로드되었습니다.'}), 200
+    except Exception as e:
+        logging.error(f"템플릿 업로드 중 오류 발생: {str(e)}")
+        return jsonify({'error': '템플릿 업로드 중 오류가 발생했습니다.'}), 500
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
@@ -39,8 +64,9 @@ def analyze():
         # Analyze resume using Claude API
         analysis_result = analyze_resume(client, resume_text)
 
-        # Generate PowerPoint
-        pptx_path = generate_portfolio(analysis_result)
+        # Generate PowerPoint using template if available
+        template_path = os.path.join(TEMPLATE_FOLDER, 'template.pptx')
+        pptx_path = generate_portfolio(analysis_result, template_path if os.path.exists(template_path) else None)
 
         return render_template('result.html', 
                             analysis=analysis_result,
@@ -53,19 +79,25 @@ def analyze():
         logging.error(f"Unexpected error in analyze: {str(e)}")
         return jsonify({'error': '이력서 분석 중 오류가 발생했습니다.'}), 500
 
-def generate_portfolio(analysis_result):
+def generate_portfolio(analysis_result, template_path=None):
     try:
-        prs = Presentation()
+        # Use template if available, otherwise create new presentation
+        if template_path and os.path.exists(template_path):
+            prs = Presentation(template_path)
+            logging.info("템플릿 파일을 사용하여 포트폴리오 생성")
+        else:
+            prs = Presentation()
+            logging.info("새로운 포트폴리오 생성")
 
-        # Title slide
-        title_slide_layout = prs.slide_layouts[0]
-        slide = prs.slides.add_slide(title_slide_layout)
-        title = slide.shapes.title
-        subtitle = slide.placeholders[1]
-        title.text = "포트폴리오"
-        subtitle.text = f"{analysis_result['work_experience'][0]['company']}"
+            # Create title slide only for new presentation
+            title_slide_layout = prs.slide_layouts[0]
+            slide = prs.slides.add_slide(title_slide_layout)
+            title = slide.shapes.title
+            subtitle = slide.placeholders[1]
+            title.text = "포트폴리오"
+            subtitle.text = f"{analysis_result['work_experience'][0]['company']}"
 
-        # Experience slides
+        # Add experience slides
         for exp in analysis_result['work_experience']:
             for resp in exp['responsibilities']:
                 bullet_slide_layout = prs.slide_layouts[1]
