@@ -4,6 +4,7 @@ import anthropic
 from flask import Flask, render_template, request, jsonify, send_file
 from werkzeug.utils import secure_filename
 from pptx import Presentation
+from pptx.util import Pt
 from utils import analyze_resume
 import logging
 
@@ -117,6 +118,17 @@ def generate_portfolio(analysis_result, template_path=None):
                                         text_frame.clear()  # 기존 텍스트 삭제
                                         p = text_frame.paragraphs[0]
                                         p.text = new_text
+                                        # 폰트 크기를 10pt로 설정
+                                        for run in p.runs:
+                                            run.font.size = Pt(10)
+                                        # 추가되는 단락들의 폰트 크기도 설정
+                                        if "\n" in new_text:
+                                            for line in new_text.split("\n")[1:]:
+                                                if line.strip():
+                                                    new_p = text_frame.add_paragraph()
+                                                    new_p.text = line
+                                                    for run in new_p.runs:
+                                                        run.font.size = Pt(10)
 
         else:
             # 템플릿이 없는 경우 새로운 프레젠테이션 생성
@@ -144,10 +156,17 @@ def generate_portfolio(analysis_result, template_path=None):
                     tf = body.text_frame
 
                     tf.text = "주요 업무"
+                    # 모든 텍스트의 폰트 크기를 10pt로 설정
+                    for paragraph in tf.paragraphs:
+                        for run in paragraph.runs:
+                            run.font.size = Pt(10)
+
                     for detail in resp['details']:
                         p = tf.add_paragraph()
                         p.text = detail
                         p.level = 1
+                        for run in p.runs:
+                            run.font.size = Pt(10)
 
                     p = tf.add_paragraph()
                     p.text = "\n성과"
@@ -155,6 +174,8 @@ def generate_portfolio(analysis_result, template_path=None):
                         p = tf.add_paragraph()
                         p.text = result
                         p.level = 1
+                        for run in p.runs:
+                            run.font.size = Pt(10)
 
         output_path = os.path.join(OUTPUT_FOLDER, 'portfolio.pptx')
         prs.save(output_path)
