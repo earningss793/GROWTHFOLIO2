@@ -1,68 +1,184 @@
+/* Base styles */
 body {
     font-family: 'Noto Sans KR', sans-serif;
     background-color: #f8f9fa;
+    color: #333;
+    line-height: 1.6;
 }
 
+.hero-section {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+    padding: 2rem 0;
+    background: linear-gradient(to bottom, #ffffff, #f8f9fa);
+}
+
+/* Typography */
+.hero-title {
+    font-size: 4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 1.5rem;
+    line-height: 1.2;
+}
+
+.hero-description {
+    font-size: 1.25rem;
+    color: #4b5563;
+    margin-bottom: 2rem;
+    font-weight: 500;
+}
+
+/* Containers */
 .container {
-    max-width: 800px;
-    padding: 2rem;
+    max-width: 1280px;
+    padding: 0 1rem;
 }
 
 .upload-container {
     background-color: white;
-    border-radius: 10px;
+    border-radius: 1rem;
     padding: 2rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    margin-top: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    margin-bottom: 2rem;
 }
 
-.file-input {
-    display: none;
+.mockup-container {
+    position: relative;
+    padding: 2rem;
 }
 
-.upload-btn {
-    display: block;
-    width: 100%;
-    padding: 1rem;
-    background-color: #007bff;
+.mockup-container img {
+    border-radius: 1rem;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+/* Form elements */
+.form-control {
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.2s;
+}
+
+.form-control:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Buttons */
+.btn {
+    padding: 0.75rem 1.5rem;
+    font-weight: 500;
+    border-radius: 0.5rem;
+    transition: all 0.2s;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb, #3b82f6);
+    border: none;
     color: white;
-    text-align: center;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s;
 }
 
-.upload-btn:hover {
-    background-color: #0056b3;
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8, #2563eb);
+    transform: translateY(-1px);
 }
 
+.btn-secondary {
+    background-color: #6b7280;
+    border: none;
+}
+
+/* Animations */
+@keyframes appear {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-appear {
+    animation: appear 0.6s ease-out forwards;
+}
+
+.opacity-0 {
+    opacity: 0;
+}
+
+[class*='animate-appear']:nth-child(1) { animation-delay: 0s; }
+[class*='animate-appear']:nth-child(2) { animation-delay: 0.2s; }
+[class*='animate-appear']:nth-child(3) { animation-delay: 0.4s; }
+[class*='animate-appear']:nth-child(4) { animation-delay: 0.6s; }
+[class*='animate-appear']:nth-child(5) { animation-delay: 0.8s; }
+
+/* Glow effect */
+.glow-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.glow-background::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(
+        circle at center,
+        rgba(59, 130, 246, 0.1) 0%,
+        rgba(59, 130, 246, 0) 70%
+    );
+    transform: rotate(-12deg);
+}
+
+/* Progress bar */
 .progress {
     margin-top: 1rem;
     display: none;
 }
 
+/* Alert messages */
 .alert {
     margin-top: 1rem;
     display: none;
+    border-radius: 0.5rem;
 }
 
-.result-container {
-    margin-top: 2rem;
+/* Example text */
+.example-text {
     background-color: white;
-    border-radius: 10px;
-    padding: 2rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.download-btn {
-    margin-top: 1rem;
+pre {
+    margin: 0;
+    white-space: pre-wrap;
 }
 
-.fade-in {
-    animation: fadeIn 0.5s;
-}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 3rem;
+    }
 
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    .hero-description {
+        font-size: 1.1rem;
+    }
 }
