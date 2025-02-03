@@ -36,7 +36,32 @@
     </div>
 
     <div class="container main-content">
-        <div class="template-container mb-4">
+        <div class="upload-container">
+            <form id="resume-form">
+                <div class="mb-3">
+                    <label for="resume-text" class="form-label">이력서 내용을 입력해주세요</label>
+                    <textarea class="form-control" id="resume-text" name="resume_text" 
+                              rows="10" placeholder="이력서 내용을 여기에 붙여넣기 해주세요..."></textarea>
+                </div>
+
+                <div class="progress">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" 
+                         aria-valuenow="0" 
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+
+                <div class="alert" role="alert"></div>
+
+                <button type="submit" class="btn btn-primary w-100 mt-3">
+                    분석 시작하기
+                </button>
+            </form>
+        </div>
+
+        <div class="template-section mt-5">
             <div class="accordion" id="templateAccordion">
                 <div class="accordion-item">
                     <h2 class="accordion-header" id="templateHeading">
@@ -63,31 +88,6 @@
                     </div>
                 </div>
             </div>
-        </div>
-
-        <div class="upload-container">
-            <form id="resume-form">
-                <div class="mb-3">
-                    <label for="resume-text" class="form-label">이력서 내용을 입력해주세요</label>
-                    <textarea class="form-control" id="resume-text" name="resume_text" 
-                              rows="10" placeholder="이력서 내용을 여기에 붙여넣기 해주세요..."></textarea>
-                </div>
-
-                <div class="progress">
-                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                         role="progressbar" 
-                         aria-valuenow="0" 
-                         aria-valuemin="0" 
-                         aria-valuemax="100">
-                    </div>
-                </div>
-
-                <div class="alert" role="alert"></div>
-
-                <button type="submit" class="btn btn-primary w-100 mt-3">
-                    분석 시작하기
-                </button>
-            </form>
         </div>
     </div>
 

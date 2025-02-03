@@ -169,6 +169,29 @@ pre {
     white-space: pre-wrap;
 }
 
+/* Template Section */
+.template-section {
+    background-color: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+}
+
+.template-section .accordion-button {
+    background-color: white;
+    color: #4b5563;
+    font-weight: 500;
+}
+
+.template-section .accordion-button:not(.collapsed) {
+    background-color: #f8f9fa;
+    color: #2563eb;
+}
+
+.template-section .accordion-body {
+    background-color: white;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .hero-title {
