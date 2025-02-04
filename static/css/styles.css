@@ -224,3 +224,62 @@ pre {
         font-size: 1.1rem;
     }
 }
+
+/* Template Selection */
+.template-selection {
+    background-color: white;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.template-option {
+    position: relative;
+}
+
+.template-option .btn-check {
+    position: absolute;
+    clip: rect(0,0,0,0);
+    pointer-events: none;
+}
+
+.template-option .btn {
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    transition: all 0.2s;
+}
+
+.template-option .btn:hover {
+    border-color: #2E74FF;
+    transform: translateY(-2px);
+}
+
+.template-option .btn-check:checked + .btn {
+    border-color: #2E74FF;
+    background-color: #f0f7ff;
+}
+
+.template-preview {
+    text-align: center;
+}
+
+.template-preview img {
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s;
+}
+
+.template-preview:hover img {
+    transform: scale(1.02);
+}
+
+.template-preview h5 {
+    margin-bottom: 0.5rem;
+    color: #2E74FF;
+}
+
+.template-preview p {
+    font-size: 0.875rem;
+    margin-bottom: 0;
+}
