@@ -35,6 +35,7 @@ body {
     line-height: 1.8;
 }
 
+/* Mockup Container */
 .mockup-container {
     position: relative;
     padding: 2rem;
@@ -214,16 +215,37 @@ pre {
     background-color: white;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .hero-title {
-        font-size: 3rem;
-    }
-
-    .hero-description {
-        font-size: 1.1rem;
-    }
+/* Carousel styles */
+.carousel {
+    margin: 2rem 0;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
+
+.carousel-item {
+    background-color: #fff;
+}
+
+.carousel-item img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.carousel-control-prev,
+.carousel-control-next {
+    width: 10%;
+    opacity: 0.8;
+}
+
+.carousel-control-prev-icon,
+.carousel-control-next-icon {
+    background-color: rgba(46, 116, 255, 0.7);
+    border-radius: 50%;
+    padding: 1.5rem;
+}
+
 
 /* Template Selection */
 .template-selection {
@@ -284,36 +306,13 @@ pre {
     margin-bottom: 0;
 }
 
-/* Carousel customization */
-.carousel {
-    border-radius: 1rem;
-    overflow: hidden;
-}
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .hero-title {
+        font-size: 3rem;
+    }
 
-.carousel-item {
-    transition: transform 0.6s ease-in-out;
-}
-
-.carousel-item img {
-    border-radius: 1rem;
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.carousel-control-prev,
-.carousel-control-next {
-    width: 10%;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-}
-
-.carousel:hover .carousel-control-prev,
-.carousel:hover .carousel-control-next {
-    opacity: 0.8;
-}
-
-.carousel-control-prev-icon,
-.carousel-control-next-icon {
-    background-color: rgba(46, 116, 255, 0.7);
-    border-radius: 50%;
-    padding: 1.5rem;
+    .hero-description {
+        font-size: 1.1rem;
+    }
 }

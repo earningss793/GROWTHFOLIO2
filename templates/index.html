@@ -11,8 +11,8 @@
 <body>
     <div class="hero-banner">
         <div class="container">
-            <div class="row align-items-center py-5">
-                <div class="col-lg-6 text-center mx-auto">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
                     <h1 class="hero-title animate-appear">
                         그로스폴리오
                     </h1>
@@ -22,35 +22,31 @@
                         AI와 함께 만들어보세요
                     </p>
                 </div>
-                <div class="col-lg-6 d-none d-lg-block">
-                    <div class="mockup-container">
-                        <div id="templateCarousel" class="carousel slide" data-bs-ride="carousel">
-                            <div class="carousel-inner">
-                                <div class="carousel-item active">
-                                    <img src="{{ url_for('static', filename='images/template_seo.png') }}" 
-                                         alt="Neon Green 템플릿" 
-                                         class="img-fluid rounded shadow-lg">
-                                </div>
-                                <div class="carousel-item">
-                                    <img src="{{ url_for('static', filename='images/template_campaign.png') }}" 
-                                         alt="Purple 템플릿" 
-                                         class="img-fluid rounded shadow-lg">
-                                </div>
+                <div class="col-lg-6">
+                    <!-- Simplified Carousel -->
+                    <div id="carouselTemplates" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="{{ url_for('static', filename='images/template_seo.png') }}" 
+                                     class="d-block w-100" alt="SEO 템플릿">
                             </div>
-                            <button class="carousel-control-prev" type="button" data-bs-target="#templateCarousel" data-bs-slide="prev">
-                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Previous</span>
-                            </button>
-                            <button class="carousel-control-next" type="button" data-bs-target="#templateCarousel" data-bs-slide="next">
-                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                                <span class="visually-hidden">Next</span>
-                            </button>
+                            <div class="carousel-item">
+                                <img src="{{ url_for('static', filename='images/template_campaign.png') }}" 
+                                     class="d-block w-100" alt="캠페인 템플릿">
+                            </div>
                         </div>
+                        <button class="carousel-control-prev" type="button" data-bs-target="#carouselTemplates" data-bs-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">이전</span>
+                        </button>
+                        <button class="carousel-control-next" type="button" data-bs-target="#carouselTemplates" data-bs-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="visually-hidden">다음</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
-        <!-- Background Glow -->
         <div class="glow-background"></div>
     </div>
 
