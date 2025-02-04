@@ -409,65 +409,87 @@ pre {
 .notion-tag.media-buying { background: linear-gradient(135deg, #E3F2FD, #90CAF9); }
 .notion-tag.media-planning { background: linear-gradient(135deg, #E0F7FA, #80DEEA); }
 
-
 /* Step by Step 가이드 스타일 */
 .steps-guide {
-    margin: 3rem 0;
-    padding: 2rem;
+    margin: 2rem 0;
+    padding: 1.5rem;
     background: white;
-    border-radius: 1rem;
+    border-radius: 0.8rem;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .steps-guide h2 {
     text-align: center;
     color: #2E74FF;
-    margin-bottom: 2rem;
+    margin-bottom: 1.5rem;
     font-weight: 700;
+    font-size: 1.5rem;
 }
 
 .steps-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 2rem;
-    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1rem;
 }
 
 .step-item {
-    text-align: center;
-    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0.8rem;
     background: linear-gradient(135deg, #f8f9fa, #ffffff);
     border-radius: 0.5rem;
     border: 1px solid #e5e7eb;
     transition: all 0.3s ease;
 }
 
-.step-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
 .step-number {
-    width: 40px;
-    height: 40px;
+    min-width: 28px;
+    height: 28px;
     background: linear-gradient(135deg, #2E74FF, #5490FF);
     color: white;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 1rem;
+    margin-right: 1rem;
     font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.step-content {
+    flex: 1;
 }
 
 .step-title {
     color: #2E74FF;
     font-weight: 600;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.2rem;
+    font-size: 1rem;
 }
 
 .step-description {
     color: #4b5563;
-    font-size: 0.9rem;
-    line-height: 1.5;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* PC 화면에서 가로 배열 */
+@media (min-width: 768px) {
+    .steps-container {
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    .step-item {
+        flex-direction: column;
+        text-align: center;
+        flex: 1;
+        padding: 1rem;
+    }
+
+    .step-number {
+        margin: 0 auto 0.5rem;
+    }
 }
