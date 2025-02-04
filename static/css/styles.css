@@ -10,25 +10,25 @@ body {
 .hero-banner {
     position: relative;
     padding: 4rem 0;
-    background: linear-gradient(135deg, #f8f5ff, #f0e6ff);
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
     overflow: hidden;
 }
 
 .hero-title {
     font-size: 4.5rem;
     font-weight: 700;
-    background: linear-gradient(135deg, #6b46c1, #805ad5);
+    background: linear-gradient(135deg, #2E74FF, #5490FF);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
     margin-bottom: 1.5rem;
     line-height: 1.2;
-    text-shadow: 0 2px 4px rgba(107, 70, 193, 0.1);
+    text-shadow: 0 2px 4px rgba(46, 116, 255, 0.1);
 }
 
 .hero-description {
     font-size: 1.25rem;
-    color: #553c9a;
+    color: #4b5563;
     margin-bottom: 2rem;
     font-weight: 500;
     display: block;
@@ -71,8 +71,8 @@ body {
     height: 200%;
     background: radial-gradient(
         circle at center,
-        rgba(159, 122, 234, 0.15) 0%,
-        rgba(159, 122, 234, 0) 70%
+        rgba(46, 116, 255, 0.15) 0%,
+        rgba(46, 116, 255, 0) 70%
     );
     transform: rotate(-12deg);
     animation: pulse 4s ease-in-out infinite alternate;
@@ -123,8 +123,8 @@ body {
 }
 
 .form-control:focus {
-    border-color: #3b82f6;
-    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    border-color: #2E74FF;
+    box-shadow: 0 0 0 3px rgba(46, 116, 255, 0.1);
 }
 
 /* Buttons */
@@ -136,13 +136,13 @@ body {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #6b46c1, #805ad5);
+    background: linear-gradient(135deg, #2E74FF, #5490FF);
     border: none;
     color: white;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(135deg, #553c9a, #6b46c1);
+    background: linear-gradient(135deg, #2361DB, #2E74FF);
     transform: translateY(-1px);
 }
 
@@ -162,7 +162,7 @@ body {
 }
 
 .progress-bar {
-    background: linear-gradient(135deg, #6b46c1, #805ad5);
+    background: linear-gradient(135deg, #2E74FF, #5490FF);
     transition: width 0.5s ease;
     color: white;
     text-align: center;
@@ -207,7 +207,7 @@ pre {
 
 .template-section .accordion-button:not(.collapsed) {
     background-color: #f8f9fa;
-    color: #2563eb;
+    color: #2E74FF;
 }
 
 .template-section .accordion-body {
