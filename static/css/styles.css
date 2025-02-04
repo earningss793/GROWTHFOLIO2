@@ -408,3 +408,66 @@ pre {
 .notion-tag.ae { background: linear-gradient(135deg, #E8EAF6, #9FA8DA); }
 .notion-tag.media-buying { background: linear-gradient(135deg, #E3F2FD, #90CAF9); }
 .notion-tag.media-planning { background: linear-gradient(135deg, #E0F7FA, #80DEEA); }
+
+
+/* Step by Step 가이드 스타일 */
+.steps-guide {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: white;
+    border-radius: 1rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.steps-guide h2 {
+    text-align: center;
+    color: #2E74FF;
+    margin-bottom: 2rem;
+    font-weight: 700;
+}
+
+.steps-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.step-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #f8f9fa, #ffffff);
+    border-radius: 0.5rem;
+    border: 1px solid #e5e7eb;
+    transition: all 0.3s ease;
+}
+
+.step-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.step-number {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #2E74FF, #5490FF);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+    font-weight: bold;
+}
+
+.step-title {
+    color: #2E74FF;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.step-description {
+    color: #4b5563;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
