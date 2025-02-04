@@ -24,9 +24,28 @@
                 </div>
                 <div class="col-lg-6 d-none d-lg-block">
                     <div class="mockup-container">
-                        <img src="{{ url_for('static', filename='images/mockup.png') }}" 
-                             alt="포트폴리오 예시" 
-                             class="img-fluid rounded shadow-lg">
+                        <div id="templateCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner">
+                                <div class="carousel-item active">
+                                    <img src="{{ url_for('static', filename='images/template_seo.png') }}" 
+                                         alt="Neon Green 템플릿" 
+                                         class="img-fluid rounded shadow-lg">
+                                </div>
+                                <div class="carousel-item">
+                                    <img src="{{ url_for('static', filename='images/template_campaign.png') }}" 
+                                         alt="Purple 템플릿" 
+                                         class="img-fluid rounded shadow-lg">
+                                </div>
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#templateCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#templateCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
