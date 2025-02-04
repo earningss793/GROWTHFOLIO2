@@ -1,31 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const resumeForm = document.getElementById('resume-form');
-    const templateForm = document.getElementById('template-form');
     const textArea = document.getElementById('resume-text');
     const progressBar = document.querySelector('.progress');
     const progressBarInner = document.querySelector('.progress-bar');
     const alert = document.querySelector('.alert');
-    const templateAlert = document.querySelector('.template-alert');
-
-    // 템플릿 업로드 처리
-    templateForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const formData = new FormData(templateForm);
-        try {
-            const response = await fetch('/upload_template', {
-                method: 'POST',
-                body: formData
-            });
-            if (response.ok) {
-                showTemplateAlert('템플릿이 성공적으로 업로드되었습니다.', 'success');
-            } else {
-                const error = await response.json();
-                showTemplateAlert(error.error, 'danger');
-            }
-        } catch (error) {
-            showTemplateAlert('템플릿 업로드 중 오류가 발생했습니다.', 'danger');
-        }
-    });
 
     // 이력서 분석 처리
     resumeForm.addEventListener('submit', async function(e) {
@@ -99,15 +77,6 @@ document.addEventListener('DOMContentLoaded', function() {
         alert.style.display = 'block';
         setTimeout(() => {
             alert.style.display = 'none';
-        }, 5000);
-    }
-
-    function showTemplateAlert(message, type) {
-        templateAlert.textContent = message;
-        templateAlert.className = `alert alert-${type} fade-in`;
-        templateAlert.style.display = 'block';
-        setTimeout(() => {
-            templateAlert.style.display = 'none';
         }, 5000);
     }
 });
