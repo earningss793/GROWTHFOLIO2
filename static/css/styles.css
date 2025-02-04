@@ -373,3 +373,37 @@ pre {
     transform: scale(1.05);
     transition: transform 0.3s ease;
 }
+
+/* 노션 스타일 태그 */
+.notion-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    justify-content: center;
+    margin: 1rem 0;
+}
+
+.notion-tag {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.3rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    background-color: #f3f3f3;
+    color: #37352f;
+    transition: all 0.2s ease;
+}
+
+.notion-tag:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.notion-tag.performance { background-color: #fff3e6; }
+.notion-tag.digital { background-color: #e6f3ff; }
+.notion-tag.brand { background-color: #f5e6ff; }
+.notion-tag.crm { background-color: #e6ffe6; }
+.notion-tag.growth { background-color: #ffe6e6; }
+.notion-tag.ae { background-color: #fff5e6; }
+.notion-tag.media-buying { background-color: #e6ffff; }
+.notion-tag.media-planning { background-color: #f2e6ff; }
