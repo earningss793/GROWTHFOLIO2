@@ -16,7 +16,7 @@ body {
 
 .hero-title {
     font-size: 4.5rem;
-    font-weight: 700;
+    font-weight: 900; /* 폰트 두께 증가 (700 -> 900) */
     background: linear-gradient(135deg, #2E74FF, #5490FF);
     -webkit-background-clip: text;
     background-clip: text;
