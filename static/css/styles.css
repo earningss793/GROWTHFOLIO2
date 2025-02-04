@@ -389,21 +389,22 @@ pre {
     border-radius: 0.3rem;
     font-size: 0.9rem;
     font-weight: 500;
-    background-color: #f3f3f3;
-    color: #37352f;
+    background: linear-gradient(135deg, #E3F2FD, #90CAF9);
+    color: #1565C0;
     transition: all 0.2s ease;
 }
 
 .notion-tag:hover {
     transform: translateY(-1px);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(21, 101, 192, 0.2);
+    background: linear-gradient(135deg, #BBDEFB, #64B5F6);
 }
 
-.notion-tag.performance { background-color: #fff3e6; }
-.notion-tag.digital { background-color: #e6f3ff; }
-.notion-tag.brand { background-color: #f5e6ff; }
-.notion-tag.crm { background-color: #e6ffe6; }
-.notion-tag.growth { background-color: #ffe6e6; }
-.notion-tag.ae { background-color: #fff5e6; }
-.notion-tag.media-buying { background-color: #e6ffff; }
-.notion-tag.media-planning { background-color: #f2e6ff; }
+.notion-tag.performance { background: linear-gradient(135deg, #E3F2FD, #90CAF9); }
+.notion-tag.digital { background: linear-gradient(135deg, #E1F5FE, #81D4FA); }
+.notion-tag.brand { background: linear-gradient(135deg, #E8EAF6, #9FA8DA); }
+.notion-tag.crm { background: linear-gradient(135deg, #E0F7FA, #80DEEA); }
+.notion-tag.growth { background: linear-gradient(135deg, #E1F5FE, #81D4FA); }
+.notion-tag.ae { background: linear-gradient(135deg, #E8EAF6, #9FA8DA); }
+.notion-tag.media-buying { background: linear-gradient(135deg, #E3F2FD, #90CAF9); }
+.notion-tag.media-planning { background: linear-gradient(135deg, #E0F7FA, #80DEEA); }
