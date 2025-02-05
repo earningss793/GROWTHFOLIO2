@@ -1,5 +1,6 @@
 document.addEventListener('DOMContentLoaded', function() {
     const resumeForm = document.getElementById('resume-form');
+    const fileInput = document.getElementById('resume-file');
     const textArea = document.getElementById('resume-text');
     const progressBar = document.querySelector('.progress');
     const progressBarInner = document.querySelector('.progress-bar');
@@ -9,9 +10,10 @@ document.addEventListener('DOMContentLoaded', function() {
     resumeForm.addEventListener('submit', async function(e) {
         e.preventDefault();
         const resumeText = textArea.value.trim();
+        const resumeFile = fileInput.files[0];
 
-        if (!resumeText) {
-            showAlert('이력서 내용을 입력해주세요.', 'danger');
+        if (!resumeText && !resumeFile) {
+            showAlert('이력서 파일을 업로드하거나 내용을 입력해주세요.', 'danger');
             return;
         }
 
@@ -21,13 +23,21 @@ document.addEventListener('DOMContentLoaded', function() {
         progressBarInner.textContent = '분석 준비중...';
 
         try {
+            const formData = new FormData();
+            if (resumeFile) {
+                formData.append('resume_file', resumeFile);
+            }
+            if (resumeText) {
+                formData.append('resume_text', resumeText);
+            }
+
             // 분석 단계별 진행상황
             const steps = [
-                { progress: 15, text: '이력서 텍스트 분석중...' },
-                { progress: 35, text: '경력 정보 추출중...' },
-                { progress: 55, text: '프로젝트 데이터 정리중...' },
-                { progress: 75, text: '포트폴리오 생성중...' },
-                { progress: 90, text: '최종 문서 작성중...' }
+                { progress: 15, text: '이력서 파일 처리중...' },
+                { progress: 35, text: '텍스트 추출 및 분석중...' },
+                { progress: 55, text: '경력 정보 추출중...' },
+                { progress: 75, text: '프로젝트 데이터 정리중...' },
+                { progress: 90, text: '포트폴리오 생성중...' }
             ];
 
             let currentStep = 0;
@@ -42,12 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const response = await fetch('/analyze', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    resume_text: resumeText
-                })
+                body: formData
             });
 
             clearInterval(stepInterval);

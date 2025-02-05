@@ -7,21 +7,50 @@ from pptx import Presentation
 from pptx.util import Pt
 from utils import analyze_resume
 import logging
+from PyPDF2 import PdfReader
+from docx import Document
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
 # Configure folders
+UPLOAD_FOLDER = 'uploads'
 OUTPUT_FOLDER = 'output'
 
 # Create necessary folders
-if not os.path.exists(OUTPUT_FOLDER):
-    os.makedirs(OUTPUT_FOLDER)
+for folder in [UPLOAD_FOLDER, OUTPUT_FOLDER]:
+    if not os.path.exists(folder):
+        os.makedirs(folder)
 
 # Initialize Anthropic client
 client = anthropic.Anthropic(
     api_key=os.environ.get('ANTHROPIC_API_KEY')
 )
+
+def extract_text_from_file(file):
+    filename = secure_filename(file.filename)
+    filepath = os.path.join(UPLOAD_FOLDER, filename)
+    file.save(filepath)
+
+    try:
+        text = ""
+        if filename.endswith('.pdf'):
+            with open(filepath, 'rb') as f:
+                pdf = PdfReader(f)
+                for page in pdf.pages:
+                    text += page.extract_text()
+        elif filename.endswith(('.doc', '.docx')):
+            doc = Document(filepath)
+            for para in doc.paragraphs:
+                text += para.text + '\n'
+
+        os.remove(filepath)  # 임시 파일 삭제
+        return text.strip()
+    except Exception as e:
+        logging.error(f"파일 처리 중 오류 발생: {str(e)}")
+        if os.path.exists(filepath):
+            os.remove(filepath)
+        raise ValueError("파일 처리 중 오류가 발생했습니다.")
 
 @app.route('/')
 def index():
@@ -29,16 +58,17 @@ def index():
 
 @app.route('/analyze', methods=['POST'])
 def analyze():
-    if not request.is_json:
-        return jsonify({'error': '잘못된 요청 형식입니다.'}), 400
-
-    data = request.get_json()
-    resume_text = data.get('resume_text')
-
-    if not resume_text:
-        return jsonify({'error': '이력서 내용이 비어있습니다.'}), 400
-
     try:
+        resume_text = request.form.get('resume_text', '')
+        if 'resume_file' in request.files:
+            file = request.files['resume_file']
+            if file.filename:
+                file_text = extract_text_from_file(file)
+                resume_text = file_text if not resume_text else resume_text + '\n' + file_text
+
+        if not resume_text:
+            return jsonify({'error': '이력서 내용이 비어있습니다.'}), 400
+
         # Analyze resume using Claude API
         analysis_result = analyze_resume(client, resume_text)
 
