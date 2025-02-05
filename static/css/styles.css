@@ -109,6 +109,90 @@ body {
     padding: 2rem 0;
 }
 
+/* File Upload Styles */
+.file-upload {
+    background-color: #fff;
+    border: 2px dashed #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.file-upload:hover {
+    border-color: #2E74FF;
+    background-color: #f8f9fa;
+}
+
+.file-upload input[type="file"] {
+    margin-bottom: 0.5rem;
+}
+
+.or-divider {
+    position: relative;
+    display: inline-block;
+    padding: 0 1rem;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.or-divider::before,
+.or-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 100px;
+    height: 1px;
+    background-color: #e5e7eb;
+}
+
+.or-divider::before {
+    right: 100%;
+}
+
+.or-divider::after {
+    left: 100%;
+}
+
+#fileHelp {
+    margin-top: 0.5rem;
+    color: #6b7280;
+    font-size: 0.875rem;
+}
+
+
+/* 업로드 컨테이너 개선 */
+.upload-container {
+    background-color: white;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    margin: 2rem auto;
+    max-width: 800px;
+}
+
+.upload-container .form-label {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 1rem;
+}
+
+.upload-container textarea {
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    font-size: 1rem;
+    resize: vertical;
+    min-height: 200px;
+}
+
+.upload-container textarea:focus {
+    border-color: #2E74FF;
+    box-shadow: 0 0 0 3px rgba(46, 116, 255, 0.1);
+    outline: none;
+}
+
 .upload-container {
     background-color: white;
     border-radius: 0.5rem;
