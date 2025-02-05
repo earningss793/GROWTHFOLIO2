@@ -68,10 +68,10 @@ def generate_portfolio(analysis_result):
         subtitle = slide.placeholders[1]
 
         # 타이틀 슬라이드 폰트 설정
-        title.text_frame.paragraphs[0].font.name = 'Noto Sans KR'
+        title.text_frame.paragraphs[0].font.name = 'Pretendard'
         title.text_frame.paragraphs[0].font.size = Pt(44)
         title.text_frame.paragraphs[0].font.bold = True
-        subtitle.text_frame.paragraphs[0].font.name = 'Noto Sans KR'
+        subtitle.text_frame.paragraphs[0].font.name = 'Pretendard'
         subtitle.text_frame.paragraphs[0].font.size = Pt(24)
 
         # 분석 결과를 슬라이드별 데이터 리스트로 변환
@@ -99,7 +99,7 @@ def generate_portfolio(analysis_result):
                 # 슬라이드 제목 설정
                 title = slide.shapes.title
                 title.text = data["project"]
-                title.text_frame.paragraphs[0].font.name = 'Noto Sans KR'
+                title.text_frame.paragraphs[0].font.name = 'Pretendard'
                 title.text_frame.paragraphs[0].font.size = Pt(32)
                 title.text_frame.paragraphs[0].font.bold = True
 
@@ -110,7 +110,7 @@ def generate_portfolio(analysis_result):
                 # 상세 내용 추가
                 p = tf.add_paragraph()
                 p.text = "프로젝트 상세"
-                p.font.name = 'Noto Sans KR'
+                p.font.name = 'Pretendard'
                 p.font.size = Pt(18)
                 p.font.bold = True
                 p.space_before = Pt(12)
@@ -118,14 +118,14 @@ def generate_portfolio(analysis_result):
 
                 p = tf.add_paragraph()
                 p.text = data["details"]
-                p.font.name = 'Noto Sans KR'
+                p.font.name = 'Pretendard'
                 p.font.size = Pt(14)
                 p.space_after = Pt(12)
 
                 # 성과 추가
                 p = tf.add_paragraph()
                 p.text = "주요 성과"
-                p.font.name = 'Noto Sans KR'
+                p.font.name = 'Pretendard'
                 p.font.size = Pt(18)
                 p.font.bold = True
                 p.space_before = Pt(12)
@@ -133,7 +133,7 @@ def generate_portfolio(analysis_result):
 
                 p = tf.add_paragraph()
                 p.text = data["results"]
-                p.font.name = 'Noto Sans KR'
+                p.font.name = 'Pretendard'
                 p.font.size = Pt(14)
 
         output_path = os.path.join(OUTPUT_FOLDER, 'portfolio.pptx')
