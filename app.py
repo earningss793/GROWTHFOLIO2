@@ -69,6 +69,12 @@ def analyze():
         if not resume_text:
             return jsonify({'error': '이력서 내용이 비어있습니다.'}), 400
 
+        # 텍스트 길이 체크 (대략적인 프로젝트 4개 분량)
+        if len(resume_text.split()) > 2000:  # 단어 수로 체크
+            return jsonify({
+                'error': '프로젝트/캠페인은 한번에 최대 4개까지 생성 가능합니다. 경력기술 내용이 너무 길다면 프로젝트를 4개씩 끊어서 입력해주세요 :)'
+            }), 400
+
         # Analyze resume using Claude API
         analysis_result = analyze_resume(client, resume_text)
 
