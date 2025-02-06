@@ -582,11 +582,12 @@ pre {
 
 /* Footer styles */
 .footer {
-    background-color: #000;
+    background-color: #f8f9fa;
     padding: 2rem 0;
     margin-top: 3rem;
     font-size: 0.875rem;
-    color: #fff;
+    color: #6b7280;
+    border-top: 1px solid #e5e7eb;
 }
 
 .footer-logo {
@@ -595,7 +596,8 @@ pre {
 }
 
 .footer-info {
-    color: rgba(255, 255, 255, 0.8);
+    text-align: right;
+    color: #6b7280;
 }
 
 .footer p {
@@ -605,7 +607,7 @@ pre {
 
 .footer .copyright {
     margin-top: 1rem;
-    color: rgba(255, 255, 255, 0.6);
+    color: #9ca3af;
 }
 
 @media (max-width: 768px) {
@@ -620,5 +622,9 @@ pre {
 
     .footer .col-md-4 {
         margin-bottom: 1.5rem;
+    }
+
+    .footer-info {
+        text-align: center;
     }
 }
