@@ -330,7 +330,6 @@ pre {
     padding: 1.5rem;
 }
 
-
 /* Template Selection */
 .template-selection {
     background-color: white;
@@ -404,12 +403,13 @@ pre {
 /* Slider Container */
 .slider-container {
     width: 100%;
-    height: 250px; /* 높이 축소 */
+    height: 200px; /* 높이 축소 */
     position: relative;
     overflow: hidden;
     background: white;
     box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     border-radius: 1rem;
+    margin: 1rem 0; /* 상하 마진 조정 */
 }
 
 .slider {
@@ -422,18 +422,23 @@ pre {
     display: flex;
     width: calc(250px * 14); /* 이미지 7개 × 2(반복) */
     animation: scroll 20s linear infinite;
+    height: 100%;
+    align-items: center;
 }
 
 .slide {
     width: 250px;
-    height: 250px;
-    padding: 0.5rem;
+    height: 200px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .slide img {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 0.5rem;
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
