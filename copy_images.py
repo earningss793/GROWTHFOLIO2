@@ -9,7 +9,8 @@ image_mapping = {
     "14.jpg": "retargeting2.jpg",
     "21.png": "armypedia.jpg",
     "Slide 55.png": "sns_operation.jpg",
-    "Slide 544.png": "seo_project.jpg"
+    "Slide 544.png": "seo_project.jpg",
+    "LOGO(main)_KOR.png": "logo.png"  # Added logo mapping
 }
 
 # static/images 디렉토리 생성
