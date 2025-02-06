@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function showAlert(message, type) {
         alert.textContent = message;
-        alert.className = `alert alert-${type} fade-in`;
+        alert.className = `alert alert-${type}`;
         alert.style.display = 'block';
         setTimeout(() => {
             alert.style.display = 'none';
