@@ -593,6 +593,13 @@ pre {
 .footer-logo {
     max-width: 200px;
     height: auto;
+    margin-bottom: 1rem;
+}
+
+.copyright {
+    color: #9ca3af;
+    font-size: 0.75rem;
+    margin-top: 0.5rem;
 }
 
 .footer-info {
@@ -605,11 +612,6 @@ pre {
     line-height: 1.5;
 }
 
-.footer .copyright {
-    margin-top: 1rem;
-    color: #9ca3af;
-}
-
 @media (max-width: 768px) {
     .footer {
         text-align: center;
@@ -617,7 +619,7 @@ pre {
     }
 
     .footer-logo {
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
     }
 
     .footer .col-md-4 {
@@ -626,5 +628,10 @@ pre {
 
     .footer-info {
         text-align: center;
+    }
+
+    .copyright {
+        text-align: center;
+        margin-top: 0.5rem;
     }
 }
