@@ -420,14 +420,14 @@ pre {
 
 .slide-track {
     display: flex;
-    width: calc(250px * 8); /* 이미지 4개 × 2(반복) */
+    width: calc(250px * 14); /* 이미지 7개 × 2(반복) */
     animation: scroll 20s linear infinite;
 }
 
 .slide {
-    width: 250px; /* 이미지 기본 너비의 50% */
+    width: 250px;
     height: 250px;
-    padding: 0.5rem; /* 패딩 축소 */
+    padding: 0.5rem;
 }
 
 .slide img {
@@ -443,7 +443,7 @@ pre {
         transform: translateX(0);
     }
     100% {
-        transform: translateX(calc(-250px * 4)); /* 이미지 4개만큼 이동 */
+        transform: translateX(calc(-250px * 7)); /* 이미지 7개만큼 이동 */
     }
 }
 
