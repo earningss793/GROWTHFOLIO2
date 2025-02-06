@@ -20,7 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
         // 진행 상태 초기화 및 표시
         progressBar.style.display = 'block';
         progressBarInner.style.width = '0%';
-        progressBarInner.textContent = '분석 준비중...';
 
         try {
             const formData = new FormData();
@@ -33,19 +32,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // 분석 단계별 진행상황
             const steps = [
-                { progress: 15, text: '이력서 파일 처리중...' },
-                { progress: 35, text: '텍스트 추출 및 분석중...' },
-                { progress: 55, text: '경력 정보 추출중...' },
-                { progress: 75, text: '프로젝트 데이터 정리중...' },
-                { progress: 90, text: '포트폴리오 생성중...' }
+                { progress: 15 },
+                { progress: 35 },
+                { progress: 55 },
+                { progress: 75 },
+                { progress: 90 }
             ];
 
             let currentStep = 0;
             const stepInterval = setInterval(() => {
                 if (currentStep < steps.length) {
-                    const { progress, text } = steps[currentStep];
+                    const { progress } = steps[currentStep];
                     progressBarInner.style.width = `${progress}%`;
-                    progressBarInner.textContent = text;
                     currentStep++;
                 }
             }, 800);
@@ -60,7 +58,6 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 // 완료 상태 표시
                 progressBarInner.style.width = '100%';
-                progressBarInner.textContent = '분석 완료!';
 
                 const result = await response.text();
                 document.body.innerHTML = result;
