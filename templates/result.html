@@ -90,12 +90,27 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.getElementById('download-btn').addEventListener('click', function() {
-            const link = document.createElement('a');
-            link.href = '/download/portfolio.pptx';
-            link.download = 'portfolio.pptx';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            fetch('/download/portfolio.pptx')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('다운로드 중 오류가 발생했습니다.');
+                    }
+                    return response.blob();
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'portfolio.pptx';
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('파일 다운로드 중 오류가 발생했습니다.');
+                });
         });
     </script>
 </body>
