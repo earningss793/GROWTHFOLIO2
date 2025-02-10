@@ -171,6 +171,34 @@ def analyze_resume(client, text_content):
 
 
 
+def fill_template_with_api_response(api_response_json, template_path, output_path):
+    try:
+        prs = Presentation(template_path)
+        
+        # Get first experience
+        exp = api_response_json['work_experience'][0]
+        
+        for slide in prs.slides:
+            for shape in slide.shapes:
+                if hasattr(shape, "text"):
+                    # Replace placeholders with actual content
+                    shape.text = shape.text.replace("{company}", exp['company'])
+                    shape.text = shape.text.replace("{team}", exp['team'])
+                    
+                    # Handle project details
+                    for resp in exp['responsibilities']:
+                        shape.text = shape.text.replace("{project_name}", resp['project'])
+                        for i, detail in enumerate(resp['details'], 1):
+                            shape.text = shape.text.replace(f"{{detail_{i}}}", detail)
+                        for i, result in enumerate(resp['results'], 1):
+                            shape.text = shape.text.replace(f"{{result_{i}}}", result)
+        
+        prs.save(output_path)
+        return output_path
+    except Exception as e:
+        logging.error(f"템플릿 적용 중 오류 발생: {str(e)}")
+        raise ValueError("포트폴리오 생성 중 오류가 발생했습니다.")
+
 # Main execution
 if __name__ == "__main__":
     # API 응답 예시 (실제 API 응답 데이터로 대체 가능)
