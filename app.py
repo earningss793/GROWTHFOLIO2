@@ -75,25 +75,28 @@ def generate_portfolio(analysis_result):
                 text_frame = shape.text_frame
                 for paragraph in text_frame.paragraphs:
                     for run in paragraph.runs:
+                        text = run.text
                         # Replace company variable
-                        if '{{company}}' in run.text:
-                            run.text = run.text.replace('{{company}}', analysis_result['work_experience'][0]['company'])
-
+                        if '{{company}}' in text:
+                            text = text.replace('{{company}}', analysis_result['work_experience'][0]['company'])
+                        
                         # Replace project variable
-                        if '{{project}}' in run.text:
-                            for exp in analysis_result['work_experience']:
-                                for resp in exp['responsibilities']:
-                                    run.text = run.text.replace('{{project}}', resp['project'])
-
+                        if '{{project}}' in text:
+                            text = text.replace('{{project}}', analysis_result['work_experience'][0]['responsibilities'][0]['project'])
+                        
                         # Replace details variable
-                        if '{{details}}' in run.text:
-                            details_text = "\n".join([f"• {detail}" for resp in analysis_result['work_experience'][0]['responsibilities'] for detail in resp['details']])
-                            run.text = run.text.replace('{{details}}', details_text)
-
+                        if '{{details}}' in text:
+                            details = analysis_result['work_experience'][0]['responsibilities'][0]['details']
+                            details_text = "\n".join([f"• {detail}" for detail in details])
+                            text = text.replace('{{details}}', details_text)
+                        
                         # Replace results variable
-                        if '{{results}}' in run.text:
-                            results_text = "\n".join([f"• {result}" for resp in analysis_result['work_experience'][0]['responsibilities'] for result in resp['results']])
-                            run.text = run.text.replace('{{results}}', results_text)
+                        if '{{results}}' in text:
+                            results = analysis_result['work_experience'][0]['responsibilities'][0]['results']
+                            results_text = "\n".join([f"• {result}" for result in results])
+                            text = text.replace('{{results}}', results_text)
+                        
+                        run.text = text
 
         output_path = os.path.join(OUTPUT_FOLDER, 'portfolio.pptx')
         prs.save(output_path)
