@@ -91,19 +91,27 @@ def generate_portfolio(analysis_result):
         # Add content slides
         for exp in analysis_result['work_experience']:
             for resp in exp['responsibilities']:
-                bullet_slide_layout = prs.slide_layouts[1]
-                slide = prs.slides.add_slide(bullet_slide_layout)
+                content_slide_layout = prs.slide_layouts[1]
+                slide = prs.slides.add_slide(content_slide_layout)
 
                 # Set slide title
-                title = slide.shapes.title
-                title.text = resp['project']
-                for paragraph in title.text_frame.paragraphs:
-                    paragraph.font.name = 'Pretendard'
-                    paragraph.font.size = Pt(32)
-                    paragraph.font.bold = True
+                if slide.shapes.title:
+                    title = slide.shapes.title
+                    title.text = resp['project']
+                    for paragraph in title.text_frame.paragraphs:
+                        paragraph.font.name = 'Pretendard'
+                        paragraph.font.size = Pt(32)
+                        paragraph.font.bold = True
 
-                # Add content
-                body = slide.placeholders[1]
+                # Add content to body placeholder - look for the first body placeholder
+                body = None
+                for shape in slide.placeholders:
+                    if shape.placeholder_format.type in (1, 2):  # 1 for body, 2 for object
+                        body = shape
+                        break
+                
+                if not body:
+                    continue
                 tf = body.text_frame
 
                 # Project details
