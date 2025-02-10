@@ -208,10 +208,17 @@ def download_file(filename):
         if not os.path.exists(file_path):
             logger.error(f"File not found: {file_path}")
             return jsonify({'error': '파일을 찾을 수 없습니다.'}), 404
-        return send_file(file_path, 
-                        as_attachment=True,
-                        download_name=filename,
-                        mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation')
+            
+        response = send_file(
+            file_path,
+            as_attachment=True,
+            download_name='portfolio.pptx',
+            mimetype='application/vnd.openxmlformats-officedocument.presentationml.presentation'
+        )
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+        return response
     except Exception as e:
         logger.error(f"Error downloading file: {str(e)}")
         return jsonify({'error': '파일 다운로드 중 오류가 발생했습니다.'}), 500
