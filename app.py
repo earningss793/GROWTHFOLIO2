@@ -60,78 +60,94 @@ def generate_portfolio(analysis_result):
     try:
         logger.debug("Starting portfolio generation...")
 
-        # Create new presentation
-        prs = Presentation()
+        # Use test_template.pptx as base template
+        template_path = os.path.join('templates', 'pptx', 'test_template.pptx')
+        if not os.path.exists(template_path):
+            raise ValueError(f"Template file not found: {template_path}")
 
-        # Add title slide
-        title_slide_layout = prs.slide_layouts[0]
-        slide = prs.slides.add_slide(title_slide_layout)
-        title = slide.shapes.title
-        subtitle = slide.placeholders[1]
+        # Create new presentation from template
+        prs = Presentation(template_path)
+
+        # Get the first slide (title slide)
+        title_slide = prs.slides[0]
+        title = title_slide.shapes.title
+        subtitle = title_slide.placeholders[1]
 
         # Set Pretendard font for title slide
-        title.text = "{{company}}"
-        title.text_frame.paragraphs[0].font.name = 'Pretendard'
-        title.text_frame.paragraphs[0].font.size = Pt(44)
-        title.text_frame.paragraphs[0].font.bold = True
+        title.text = analysis_result['work_experience'][0]['company']
+        for paragraph in title.text_frame.paragraphs:
+            paragraph.font.name = 'Pretendard'
+            paragraph.font.size = Pt(44)
+            paragraph.font.bold = True
 
-        subtitle.text = "{{start_date}} - {{end_date}}"
-        subtitle.text_frame.paragraphs[0].font.name = 'Pretendard'
-        subtitle.text_frame.paragraphs[0].font.size = Pt(24)
+        # Set date range in subtitle
+        exp = analysis_result['work_experience'][0]
+        date_range = f"{exp['start_date']} - {exp['end_date']}"
+        subtitle.text = date_range
+        for paragraph in subtitle.text_frame.paragraphs:
+            paragraph.font.name = 'Pretendard'
+            paragraph.font.size = Pt(24)
 
         # Add content slides
-        for project in analysis_result['work_experience']:
-            bullet_slide_layout = prs.slide_layouts[1]
-            slide = prs.slides.add_slide(bullet_slide_layout)
+        for exp in analysis_result['work_experience']:
+            for resp in exp['responsibilities']:
+                bullet_slide_layout = prs.slide_layouts[1]
+                slide = prs.slides.add_slide(bullet_slide_layout)
 
-            # Set slide title
-            title = slide.shapes.title
-            title.text = "{{project}}"
-            title.text_frame.paragraphs[0].font.name = 'Pretendard'
-            title.text_frame.paragraphs[0].font.size = Pt(32)
-            title.text_frame.paragraphs[0].font.bold = True
+                # Set slide title
+                title = slide.shapes.title
+                title.text = resp['project']
+                for paragraph in title.text_frame.paragraphs:
+                    paragraph.font.name = 'Pretendard'
+                    paragraph.font.size = Pt(32)
+                    paragraph.font.bold = True
 
-            # Add content
-            body = slide.placeholders[1]
-            tf = body.text_frame
+                # Add content
+                body = slide.placeholders[1]
+                tf = body.text_frame
 
-            # Project details
-            p = tf.add_paragraph()
-            p.text = "프로젝트 상세"
-            p.font.name = 'Pretendard'
-            p.font.size = Pt(18)
-            p.font.bold = True
-            p.space_before = Pt(12)
-            p.space_after = Pt(6)
+                # Project details
+                p = tf.add_paragraph()
+                p.text = "프로젝트 상세"
+                p.font.name = 'Pretendard'
+                p.font.size = Pt(18)
+                p.font.bold = True
+                p.space_before = Pt(12)
+                p.space_after = Pt(6)
 
-            p = tf.add_paragraph()
-            p.text = "{{details}}"
-            p.font.name = 'Pretendard'
-            p.font.size = Pt(14)
-            p.space_after = Pt(12)
+                # Add details with bullet points
+                for detail in resp['details']:
+                    p = tf.add_paragraph()
+                    p.text = f"• {detail}"
+                    p.font.name = 'Pretendard'
+                    p.font.size = Pt(14)
+                    p.space_after = Pt(6)
 
-            # Results
-            p = tf.add_paragraph()
-            p.text = "주요 성과"
-            p.font.name = 'Pretendard'
-            p.font.size = Pt(18)
-            p.font.bold = True
-            p.space_before = Pt(12)
-            p.space_after = Pt(6)
+                # Results section
+                p = tf.add_paragraph()
+                p.text = "주요 성과"
+                p.font.name = 'Pretendard'
+                p.font.size = Pt(18)
+                p.font.bold = True
+                p.space_before = Pt(12)
+                p.space_after = Pt(6)
 
-            p = tf.add_paragraph()
-            p.text = "{{results}}"
-            p.font.name = 'Pretendard'
-            p.font.size = Pt(14)
+                # Add results with bullet points
+                for result in resp['results']:
+                    p = tf.add_paragraph()
+                    p.text = f"• {result}"
+                    p.font.name = 'Pretendard'
+                    p.font.size = Pt(14)
+                    p.space_after = Pt(6)
 
         output_path = os.path.join(OUTPUT_FOLDER, 'portfolio.pptx')
         prs.save(output_path)
-        logger.info("Portfolio generation completed successfully")
+        logger.info(f"Portfolio saved successfully at {output_path}")
         return output_path
 
     except Exception as e:
         logger.error(f"Error generating portfolio: {str(e)}")
-        raise ValueError("Error occurred while generating the portfolio.")
+        raise ValueError(f"Failed to generate portfolio: {str(e)}")
 
 @app.route('/')
 def index():
