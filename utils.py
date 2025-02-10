@@ -171,8 +171,7 @@ def analyze_resume(client, text_content):
 
 
 
-// ... existing code ...
-
+# Main execution
 if __name__ == "__main__":
     # API 응답 예시 (실제 API 응답 데이터로 대체 가능)
     api_response_json = {
