@@ -92,6 +92,8 @@ def analyze():
         logging.error(f"Unexpected error in analyze: {str(e)}")
         return jsonify({'error': '이력서 분석 중 오류가 발생했습니다.'}), 500
 
+
+#포트폴리오 생성(생성에집중)
 def generate_portfolio(analysis_result):
     try:
         # 새로운 프레젠테이션 생성
@@ -189,3 +191,32 @@ def download_file(filename):
     except Exception as e:
         logging.error(f"파일 다운로드 중 오류 발생: {str(e)}")
         return jsonify({'error': '파일 다운로드 중 오류가 발생했습니다.'}), 500
+
+
+
+from flask import Flask, send_file, render_template, request
+from utils import fill_template_with_api_response
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/download_portfolio', methods=['POST'])
+def download_portfolio():
+    # 클라이언트로부터 API 응답 데이터를 받음
+    api_response_json = request.json
+
+    # 템플릿 파일 경로 지정 (상대경로 사용, raw string 권장)
+    template_path = r"templates\pptx\test_template.pptx"
+    output_path = "output_presentation.pptx"
+
+    # 템플릿을 채우고 파일 생성
+    fill_template_with_api_response(api_response_json, template_path, output_path)
+
+    # 생성된 파일을 클라이언트에게 전송
+    return send_file(output_path, as_attachment=True)
+
+if __name__ == "__main__":
+    app.run(debug=True)

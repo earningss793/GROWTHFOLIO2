@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>포트폴리오 다운로드</title>
+    <script>
+        function downloadPortfolio() {
+            const apiResponse = {
+                "work_experience": [
+                    {
+                        "start_date": "2023.10",
+                        "end_date": "2024.08",
+                        "company": "빅플래닛메이드엔터",
+                        "team": "비주얼컨텐츠팀",
+                        "responsibilities": [
+                            {
+                                "project": "프로젝트 1: 앨범 프로모션 컨텐츠",
+                                "details": [
+                                    "아티스트 앨범 발매에 맞춘 컨텐츠 기획 및 제작.",
+                                    "앨범의 타이틀곡에 대한 홍보 영상 제작 및 배포.",
+                                    "소셜 미디어용 짧은 숏폼 컨텐츠 제작.",
+                                    "앨범 프로모션 관련 행사 자료 시각화 및 디자인.",
+                                    "팬들과 소통할 수 있는 디지털 이벤트 기획."
+                                ],
+                                "results": [
+                                    "앨범 프로모션 컨텐츠 조회수 100만 회 기록.",
+                                    "SNS 채널 평균 CTR 12.5% 달성.",
+                                    "담당 기간 전 대비 앨범 매출 25% 증가."
+                                ]
+                            },
+                            {
+                                "project": "프로젝트 2: 신규 브랜드 런칭 캠페인",
+                                "details": [
+                                    "신규 브랜드 컨셉 기획 및 시장 조사 실시.",
+                                    "캠페인 영상 및 디지털 광고 콘텐츠 제작.",
+                                    "온/오프라인 프로모션 이벤트 기획 및 실행.",
+                                    "협력 업체 및 인플루언서 네트워킹 구축.",
+                                    "브랜드 런칭 관련 PR 및 미디어 커버리지 확보."
+                                ],
+                                "results": [
+                                    "브랜드 인지도 40% 상승.",
+                                    "캠페인 관련 소셜 미디어 참여율 20% 증가.",
+                                    "런칭 후 3개월 내 매출 30% 성장."
+                                ]
+                            }
+                        ]
+                    }
+                ]
+            };
+
+            fetch('/download_portfolio', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(apiResponse)
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'portfolio.pptx';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+    <h1>포트폴리오 다운로드</h1>
+    <button onclick="downloadPortfolio()">포트폴리오 다운로드</button>
+</body>
+</html>
