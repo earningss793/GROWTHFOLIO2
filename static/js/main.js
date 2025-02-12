@@ -5,14 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBar = document.querySelector('.progress');
     const progressBarInner = document.querySelector('.progress-bar');
     const alert = document.querySelector('.alert');
-    const downloadBtn = document.getElementById('download-btn');
-
-    if (downloadBtn) {
-        downloadBtn.addEventListener('click', function() {
-            const selectedTemplate = document.querySelector('input[name="template-option"]:checked')?.value || 'default';
-            window.location.href = `/download/portfolio.pptx`;
-        });
-    }
 
     // 이력서 분석 처리
     if (resumeForm) {
