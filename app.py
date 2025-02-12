@@ -2,13 +2,13 @@ import os
 import json
 import anthropic
 import logging
-from flask import Flask, render_template, request, jsonify, send_file
+from flask import Flask, render_template, request, jsonify, send_file, session
 from werkzeug.utils import secure_filename
-from pptx import Presentation
-from pptx.util import Pt
+from pptx import Presentation 
 from utils import analyze_resume
 from PyPDF2 import PdfReader
 from docx import Document
+import shutil
 
 # Configure logging
 logging.basicConfig(level=logging.DEBUG)
@@ -56,57 +56,6 @@ def extract_text_from_file(file):
             os.remove(filepath)
         raise ValueError("Error occurred while processing the file.")
 
-def generate_portfolio(analysis_result):
-    try:
-        logger.debug("Starting portfolio generation...")
-
-        template_path = os.path.join('templates', 'pptx', 'test_template.pptx')
-        if not os.path.exists(template_path):
-            raise ValueError(f"Template file not found: {template_path}")
-
-        prs = Presentation(template_path)
-
-        # Process each slide in the presentation
-        for slide in prs.slides:
-            for shape in slide.shapes:
-                if not shape.has_text_frame:
-                    continue
-
-                text_frame = shape.text_frame
-                for paragraph in text_frame.paragraphs:
-                    for run in paragraph.runs:
-                        text = run.text
-                        # Replace company variable
-                        if '{{company}}' in text:
-                            text = text.replace('{{company}}', analysis_result['work_experience'][0]['company'])
-                        
-                        # Replace project variable
-                        if '{{project}}' in text:
-                            text = text.replace('{{project}}', analysis_result['work_experience'][0]['responsibilities'][0]['project'])
-                        
-                        # Replace details variable
-                        if '{{details}}' in text:
-                            details = analysis_result['work_experience'][0]['responsibilities'][0]['details']
-                            details_text = "\n".join([f"• {detail}" for detail in details])
-                            text = text.replace('{{details}}', details_text)
-                        
-                        # Replace results variable
-                        if '{{results}}' in text:
-                            results = analysis_result['work_experience'][0]['responsibilities'][0]['results']
-                            results_text = "\n".join([f"• {result}" for result in results])
-                            text = text.replace('{{results}}', results_text)
-                        
-                        run.text = text
-
-        output_path = os.path.join(OUTPUT_FOLDER, 'portfolio.pptx')
-        prs.save(output_path)
-        logger.info(f"Portfolio saved successfully at {output_path}")
-        return output_path
-
-    except Exception as e:
-        logger.error(f"Error generating portfolio: {str(e)}")
-        raise ValueError(f"Failed to generate portfolio: {str(e)}")
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -131,11 +80,19 @@ def analyze():
 
         logger.info("Claude API 호출 성공")
         analysis_result = analyze_resume(client, resume_text)
-        pptx_path = generate_portfolio(analysis_result)
+
+        # Copy template to output folder
+        template_path = os.path.join('templates', 'pptx', 'test_template.pptx')
+        output_path = os.path.join(OUTPUT_FOLDER, 'portfolio.pptx')
+
+        if not os.path.exists(template_path):
+            return jsonify({'error': '템플릿 파일을 찾을 수 없습니다.'}), 500
+
+        shutil.copy2(template_path, output_path)
 
         return render_template('result.html', 
                             analysis=analysis_result,
-                            pptx_path=pptx_path)
+                            pptx_path=output_path)
 
     except ValueError as e:
         logger.error(f"Value error in analyze: {str(e)}")
@@ -177,3 +134,18 @@ def download_file(filename):
     except Exception as e:
         logger.error(f"Error in download route: {str(e)}")
         return jsonify({'error': '파일 다운로드 중 오류가 발생했습니다.'}), 500
+
+@app.route('/save_portfolio', methods=['POST'])
+def save_portfolio():
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': '데이터가 없습니다.'}), 400
+
+        # 수정된 데이터를 세션에 저장
+        session['portfolio_data'] = data
+
+        return jsonify({'message': '포트폴리오가 성공적으로 저장되었습니다.'}), 200
+    except Exception as e:
+        logger.error(f"Error saving portfolio: {str(e)}")
+        return jsonify({'error': '저장 중 오류가 발생했습니다.'}), 500
