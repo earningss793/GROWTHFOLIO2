@@ -1,3 +1,4 @@
+
 from pptx import Presentation
 from pptx.util import Pt
 import os
@@ -12,33 +13,30 @@ def create_template():
     title = slide.shapes.title
     subtitle = slide.placeholders[1]
 
-    # Set Pretendard font for title slide
+    # Set title slide defaults
     title.text = "Portfolio Template"
-    for paragraph in title.text_frame.paragraphs:
-        paragraph.font.name = 'Pretendard'
-        paragraph.font.size = Pt(44)
-        paragraph.font.bold = True
-
     subtitle.text = "Date Range"
-    for paragraph in subtitle.text_frame.paragraphs:
-        paragraph.font.name = 'Pretendard'
-        paragraph.font.size = Pt(24)
 
-    # Add content slide layout
-    bullet_slide_layout = prs.slide_layouts[1]
-    slide = prs.slides.add_slide(bullet_slide_layout)
+    for shape in slide.shapes:
+        if shape.has_text_frame:
+            for paragraph in shape.text_frame.paragraphs:
+                paragraph.font.name = 'Pretendard'
+                if shape == title:
+                    paragraph.font.size = Pt(44)
+                else:
+                    paragraph.font.size = Pt(24)
+
+    # Add content slide layout with text placeholder
+    content_slide_layout = prs.slide_layouts[1]  # Using layout 1 which typically has title and content
+    slide = prs.slides.add_slide(content_slide_layout)
     
     # Set title
-    title = slide.shapes.title
-    title.text = "Project Template"
-    for paragraph in title.text_frame.paragraphs:
-        paragraph.font.name = 'Pretendard'
-        paragraph.font.size = Pt(32)
-        paragraph.font.bold = True
-
-    # Add content placeholder
-    body = slide.placeholders[1]
-    tf = body.text_frame
+    if slide.shapes.title:
+        title = slide.shapes.title
+        title.text = "Project Template"
+        for paragraph in title.text_frame.paragraphs:
+            paragraph.font.name = 'Pretendard'
+            paragraph.font.size = Pt(32)
 
     # Create directory if it doesn't exist
     os.makedirs('templates/pptx', exist_ok=True)
