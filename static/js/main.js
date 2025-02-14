@@ -10,91 +10,148 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const submitProject = document.getElementById('submitProject');
     const projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
+    const projectNameInput = document.getElementById('projectName');
 
-    if (submitProject) {
-        submitProject.addEventListener('click', async function() {
-            const projectName = document.getElementById('projectName').value.trim();
-            if (!projectName) {
-                showAlert('프로젝트명을 입력해주세요.', 'danger');
-                return;
-            }
-
-            submitProject.disabled = true;
-            
-            // Show progress bar
-            const progressBar = document.createElement('div');
-            progressBar.className = 'progress mt-3';
-            progressBar.innerHTML = `
-                <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                     role="progressbar" 
-                     style="width: 0%">
-                </div>
-            `;
-            document.querySelector('.modal-body').appendChild(progressBar);
-            
-            try {
-                // Animate progress bar
-                const progressElement = progressBar.querySelector('.progress-bar');
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    if (progress < 90) {
-                        progress += 10;
-                        progressElement.style.width = `${progress}%`;
-                    }
-                }, 300);
-
-                const response = await fetch('/api/projects', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ project_name: projectName })
-                });
-
-                const result = await response.json();
-                if (response.ok) {
-                    // Complete progress bar
-                    clearInterval(progressInterval);
-                    progressBar.querySelector('.progress-bar').style.width = '100%';
-                    
-                    const projectSection = document.createElement('div');
-                    projectSection.className = 'card mb-4';
-                    projectSection.innerHTML = `
-                        <div class="card-header">
-                            <h5 class="mb-0">프로젝트명: ${result.project_name}</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-4">
-                                <strong>업무 내용:</strong>
-                                <ul>
-                                    ${result.details.map(detail => `<li>${detail}</li>`).join('')}
-                                </ul>
-                                <strong>성과:</strong>
-                                <ul>
-                                    ${result.results.map(result => `<li>${result}</li>`).join('')}
-                                </ul>
-                            </div>
-                        </div>
-                    `;
-                    document.getElementById('additional-projects').appendChild(projectSection);
-                    setTimeout(() => {
-                        progressBar.remove();
-                        projectModal.hide();
-                        document.getElementById('projectName').value = '';
-                    }, 500);
-                    window.scrollTo({
-                        top: projectSection.offsetTop,
-                        behavior: 'smooth'
-                    });
-                } else {
-                    showAlert(result.error || '프로젝트 추가 중 오류가 발생했습니다.', 'danger');
-                }
-            } catch (error) {
-                showAlert('서버와의 통신 중 오류가 발생했습니다.', 'danger');
-            } finally {
-                submitProject.disabled = false;
+    // Add enter key handler
+    if (projectNameInput) {
+        projectNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleProjectSubmission();
             }
         });
+    }
+
+    if (submitProject) {
+        submitProject.addEventListener('click', handleProjectSubmission);
+    }
+
+    async function handleProjectSubmission() {
+        const projectName = projectNameInput.value.trim();
+        if (!projectName) {
+            showAlert('프로젝트명을 입력해주세요.', 'danger');
+            return;
+        }
+
+        submitProject.disabled = true;
+
+        // Show progress bar
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress mt-3';
+        progressBar.innerHTML = `
+            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                 role="progressbar" 
+                 style="width: 0%">
+            </div>
+        `;
+        document.querySelector('.modal-body').appendChild(progressBar);
+
+        try {
+            // Get header info from existing content
+            const headerInfo = getExistingHeaderInfo();
+
+            // Animate progress bar
+            const progressElement = progressBar.querySelector('.progress-bar');
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                if (progress < 90) {
+                    progress += 10;
+                    progressElement.style.width = `${progress}%`;
+                }
+            }, 300);
+
+            const response = await fetch('/api/projects', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    project_name: projectName,
+                    header_info: headerInfo
+                })
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                // Complete progress bar
+                clearInterval(progressInterval);
+                progressElement.style.width = '100%';
+
+                // Create single project section
+                const projectSection = document.createElement('div');
+                projectSection.className = 'card mb-4';
+                projectSection.innerHTML = createProjectHTML(result, headerInfo);
+
+                // Replace existing input section or append to additional projects
+                const targetSection = document.getElementById('additional-projects');
+                targetSection.appendChild(projectSection);
+
+                setTimeout(() => {
+                    progressBar.remove();
+                    projectModal.hide();
+                    projectNameInput.value = '';
+                }, 500);
+
+                window.scrollTo({
+                    top: projectSection.offsetTop,
+                    behavior: 'smooth'
+                });
+            } else {
+                showAlert(result.error || '프로젝트 추가 중 오류가 발생했습니다.', 'danger');
+            }
+        } catch (error) {
+            showAlert('서버와의 통신 중 오류가 발생했습니다.', 'danger');
+        } finally {
+            submitProject.disabled = false;
+        }
+    }
+
+    function getExistingHeaderInfo() {
+        const existingHeader = document.querySelector('.card-header');
+        if (!existingHeader) return null;
+
+        const title = existingHeader.querySelector('h5')?.textContent || '';
+        const period = existingHeader.querySelector('small')?.textContent || '';
+
+        return { title, period };
+    }
+
+    function createProjectHTML(result, headerInfo) {
+        return `
+            <div class="card-header">
+                <h5 class="mb-0">${headerInfo?.title || result.project_name}</h5>
+                <small>${headerInfo?.period || ''}</small>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <strong>업무 내용:</strong>
+                    <ul>
+                        ${result.details.map(detail => `<li>${detail}</li>`).join('')}
+                    </ul>
+                    <strong>성과:</strong>
+                    <ul>
+                        ${result.results.map(result => `<li>${result}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+    }
+
+    function showAlert(message, type) {
+        const alert = document.querySelector('.alert') || createAlert();
+        alert.textContent = message;
+        alert.className = `alert alert-${type}`;
+        alert.style.display = 'block';
+        setTimeout(() => {
+            alert.style.display = 'none';
+        }, 5000);
+    }
+
+    function createAlert() {
+        const alert = document.createElement('div');
+        alert.className = 'alert';
+        document.querySelector('.modal-body').appendChild(alert);
+        return alert;
     }
 
     // 이력서 분석 처리
@@ -163,15 +220,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 progressBar.style.display = 'none';
             }
         });
-    }
-
-    function showAlert(message, type) {
-        alert.textContent = message;
-        alert.className = `alert alert-${type}`;
-        alert.style.display = 'block';
-        setTimeout(() => {
-            alert.style.display = 'none';
-        }, 5000);
     }
 
     function createProjectInputSection() {
