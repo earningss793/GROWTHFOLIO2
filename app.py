@@ -89,3 +89,59 @@ def analyze():
     except Exception as e:
         logger.error(f"Unexpected error in analyze: {str(e)}")
         return jsonify({'error': '이력서 분석 중 오류가 발생했습니다.'}), 500
+
+@app.route('/api/projects', methods=['POST'])
+def add_project():
+    try:
+        data = request.get_json()
+        if not data or 'project_name' not in data:
+            return jsonify({'error': '프로젝트명이 필요합니다.'}), 400
+
+        project_name = data['project_name']
+        if not project_name.strip():
+            return jsonify({'error': '유효한 프로젝트명을 입력해주세요.'}), 400
+
+        # Claude API를 사용하여 프로젝트 세부사항 생성
+        prompt = f"""다음 프로젝트에 대한 구체적인 업무 내용 5가지와 수치화된 성과 3가지를 생성해주세요:
+
+프로젝트명: {project_name}
+
+출력 형식:
+{{
+    "project_name": "프로젝트명",
+    "details": [
+        "구체적인 업무 내용 1",
+        "구체적인 업무 내용 2",
+        "구체적인 업무 내용 3",
+        "구체적인 업무 내용 4",
+        "구체적인 업무 내용 5"
+    ],
+    "results": [
+        "수치화된 성과 1",
+        "수치화된 성과 2",
+        "수치화된 성과 3"
+    ]
+}}"""
+
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1000,
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        # API 응답에서 JSON 추출
+        content = response.content[0].text
+        json_start = content.find('{')
+        json_end = content.rfind('}') + 1
+        if json_start == -1 or json_end == 0:
+            raise ValueError("API 응답을 처리할 수 없습니다")
+
+        result = json.loads(content[json_start:json_end])
+        return jsonify(result)
+
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON 파싱 오류: {str(e)}")
+        return jsonify({'error': 'API 응답을 처리할 수 없습니다.'}), 500
+    except Exception as e:
+        logger.error(f"프로젝트 추가 중 오류 발생: {str(e)}")
+        return jsonify({'error': '프로젝트 추가 중 오류가 발생했습니다.'}), 500

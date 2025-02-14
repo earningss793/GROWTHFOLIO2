@@ -6,6 +6,52 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBarInner = document.querySelector('.progress-bar');
     const alert = document.querySelector('.alert');
 
+    // 프로젝트 추가 기능
+    const submitProjectBtn = document.getElementById('submitProject');
+    const projectNameInput = document.getElementById('projectName');
+    const addProjectModal = document.getElementById('addProjectModal');
+
+    if (submitProjectBtn && projectNameInput) {
+        submitProjectBtn.addEventListener('click', async function() {
+            const projectName = projectNameInput.value.trim();
+
+            if (!projectName) {
+                showAlert('프로젝트명을 입력해주세요.', 'danger');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ project_name: projectName })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // 모달 닫기
+                    const modal = bootstrap.Modal.getInstance(addProjectModal);
+                    modal.hide();
+
+                    // 결과 표시
+                    const projectsContainer = document.getElementById('additional-projects');
+                    const projectElement = createProjectElement(result);
+                    projectsContainer.appendChild(projectElement);
+
+                    // 입력 필드 초기화
+                    projectNameInput.value = '';
+                } else {
+                    showAlert(result.error || '프로젝트 추가 중 오류가 발생했습니다.', 'danger');
+                }
+            } catch (error) {
+                showAlert('서버와의 통신 중 오류가 발생했습니다.', 'danger');
+            }
+        });
+    }
+
     // 이력서 분석 처리
     if (resumeForm) {
         resumeForm.addEventListener('submit', async function(e) {
@@ -81,5 +127,28 @@ document.addEventListener('DOMContentLoaded', function() {
         setTimeout(() => {
             alert.style.display = 'none';
         }, 5000);
+    }
+
+    function createProjectElement(projectData) {
+        const div = document.createElement('div');
+        div.className = 'card mb-4';
+        div.innerHTML = `
+            <div class="card-header">
+                <h5 class="mb-0">프로젝트명: ${projectData.project_name}</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-4">
+                    <strong>업무 내용:</strong>
+                    <ul>
+                        ${projectData.details.map(detail => `<li>${detail}</li>`).join('')}
+                    </ul>
+                    <strong>성과:</strong>
+                    <ul>
+                        ${projectData.results.map(result => `<li>${result}</li>`).join('')}
+                    </ul>
+                </div>
+            </div>
+        `;
+        return div;
     }
 });
