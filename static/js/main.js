@@ -5,50 +5,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const progressBar = document.querySelector('.progress');
     const progressBarInner = document.querySelector('.progress-bar');
     const alert = document.querySelector('.alert');
+    const addProjectBtn = document.getElementById('addProjectBtn');
+    const additionalProjects = document.getElementById('additional-projects');
 
-    // 프로젝트 추가 기능
-    const submitProjectBtn = document.getElementById('submitProject');
-    const projectNameInput = document.getElementById('projectName');
-    const addProjectModal = document.getElementById('addProjectModal');
-
-    if (submitProjectBtn && projectNameInput) {
-        submitProjectBtn.addEventListener('click', async function() {
-            const projectName = projectNameInput.value.trim();
-
-            if (!projectName) {
-                showAlert('프로젝트명을 입력해주세요.', 'danger');
-                return;
-            }
-
-            try {
-                const response = await fetch('/api/projects', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({ project_name: projectName })
-                });
-
-                const result = await response.json();
-
-                if (response.ok) {
-                    // 모달 닫기
-                    const modal = bootstrap.Modal.getInstance(addProjectModal);
-                    modal.hide();
-
-                    // 결과 표시
-                    const projectsContainer = document.getElementById('additional-projects');
-                    const projectElement = createProjectElement(result);
-                    projectsContainer.appendChild(projectElement);
-
-                    // 입력 필드 초기화
-                    projectNameInput.value = '';
-                } else {
-                    showAlert(result.error || '프로젝트 추가 중 오류가 발생했습니다.', 'danger');
-                }
-            } catch (error) {
-                showAlert('서버와의 통신 중 오류가 발생했습니다.', 'danger');
-            }
+    if (addProjectBtn) {
+        addProjectBtn.addEventListener('click', function() {
+            const projectSection = createProjectInputSection();
+            additionalProjects.appendChild(projectSection);
         });
     }
 
@@ -129,26 +92,73 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 5000);
     }
 
-    function createProjectElement(projectData) {
-        const div = document.createElement('div');
-        div.className = 'card mb-4';
-        div.innerHTML = `
-            <div class="card-header">
-                <h5 class="mb-0">프로젝트명: ${projectData.project_name}</h5>
-            </div>
+    function createProjectInputSection() {
+        const section = document.createElement('div');
+        section.className = 'card mb-4 project-section';
+        section.innerHTML = `
             <div class="card-body">
-                <div class="mb-4">
-                    <strong>업무 내용:</strong>
-                    <ul>
-                        ${projectData.details.map(detail => `<li>${detail}</li>`).join('')}
-                    </ul>
-                    <strong>성과:</strong>
-                    <ul>
-                        ${projectData.results.map(result => `<li>${result}</li>`).join('')}
-                    </ul>
+                <div class="input-group">
+                    <input type="text" class="form-control" placeholder="프로젝트명을 입력하세요">
+                    <button class="btn btn-primary submit-project">확인</button>
                 </div>
             </div>
         `;
-        return div;
+
+        const input = section.querySelector('input');
+        const submitBtn = section.querySelector('.submit-project');
+
+        submitBtn.addEventListener('click', async () => {
+            const projectName = input.value.trim();
+            if (!projectName) {
+                showAlert('프로젝트명을 입력해주세요.', 'danger');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            input.disabled = true;
+
+            try {
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ project_name: projectName })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    // 입력 섹션을 결과로 교체
+                    section.innerHTML = `
+                        <div class="card-header">
+                            <h5 class="mb-0">프로젝트명: ${result.project_name}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <strong>업무 내용:</strong>
+                                <ul>
+                                    ${result.details.map(detail => `<li>${detail}</li>`).join('')}
+                                </ul>
+                                <strong>성과:</strong>
+                                <ul>
+                                    ${result.results.map(result => `<li>${result}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    showAlert(result.error || '프로젝트 추가 중 오류가 발생했습니다.', 'danger');
+                    submitBtn.disabled = false;
+                    input.disabled = false;
+                }
+            } catch (error) {
+                showAlert('서버와의 통신 중 오류가 발생했습니다.', 'danger');
+                submitBtn.disabled = false;
+                input.disabled = false;
+            }
+        });
+
+        return section;
     }
 });
