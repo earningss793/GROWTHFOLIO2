@@ -20,7 +20,29 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             submitProject.disabled = true;
+            
+            // Show progress bar
+            const progressBar = document.createElement('div');
+            progressBar.className = 'progress mt-3';
+            progressBar.innerHTML = `
+                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                     role="progressbar" 
+                     style="width: 0%">
+                </div>
+            `;
+            document.querySelector('.modal-body').appendChild(progressBar);
+            
             try {
+                // Animate progress bar
+                const progressElement = progressBar.querySelector('.progress-bar');
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    if (progress < 90) {
+                        progress += 10;
+                        progressElement.style.width = `${progress}%`;
+                    }
+                }, 300);
+
                 const response = await fetch('/api/projects', {
                     method: 'POST',
                     headers: {
@@ -31,6 +53,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const result = await response.json();
                 if (response.ok) {
+                    // Complete progress bar
+                    clearInterval(progressInterval);
+                    progressBar.querySelector('.progress-bar').style.width = '100%';
+                    
                     const projectSection = document.createElement('div');
                     projectSection.className = 'card mb-4';
                     projectSection.innerHTML = `
@@ -51,8 +77,11 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                     `;
                     document.getElementById('additional-projects').appendChild(projectSection);
-                    projectModal.hide();
-                    document.getElementById('projectName').value = '';
+                    setTimeout(() => {
+                        progressBar.remove();
+                        projectModal.hide();
+                        document.getElementById('projectName').value = '';
+                    }, 500);
                     window.scrollTo({
                         top: projectSection.offsetTop,
                         behavior: 'smooth'
