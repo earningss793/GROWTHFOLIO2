@@ -1,46 +1,35 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>분석 결과</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
     <div class="container">
-        <h1 class="text-center mb-4">분석 결과</h1>
-
-        <div class="result-container">
-            {% for exp in analysis.work_experience %}
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h5 class="mb-0">{{ exp.company }} - {{ exp.team }}</h5>
-                    <small class="text-muted">{{ exp.start_date }} ~ {{ exp.end_date }}</small>
-                </div>
-                <div class="card-body">
-                    {% for resp in exp.responsibilities %}
-                    <div class="mb-4">
-                        <h6 class="card-subtitle mb-2 text-muted">{{ resp.project }}</h6>
-
-                        <strong>업무 내용:</strong>
-                        <ul>
-                            {% for detail in resp.details %}
-                            <li>{{ detail }}</li>
-                            {% endfor %}
-                        </ul>
-
-                        <strong>성과:</strong>
-                        <ul>
-                            {% for result in resp.results %}
-                            <li>{{ result }}</li>
-                            {% endfor %}
-                        </ul>
+        <div class="analysis-result">
+            <h2 class="mb-4">분석 결과</h2>
+            {% for experience in analysis.work_experience %}
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">{{ experience.company }} - {{ experience.team }}</h5>
+                        <small>{{ experience.start_date }} ~ {{ experience.end_date }}</small>
                     </div>
+                    {% for responsibility in experience.responsibilities %}
+                        <div class="card-body">
+                            <h6 class="card-subtitle mb-3">{{ responsibility.project }}</h6>
+                            <div class="mb-4">
+                                <strong>업무 내용:</strong>
+                                <ul>
+                                    {% for detail in responsibility.details %}
+                                        <li>{{ detail }}</li>
+                                    {% endfor %}
+                                </ul>
+                                <strong>성과:</strong>
+                                <ul>
+                                    {% for result in responsibility.results %}
+                                        <li>{{ result }}</li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        </div>
                     {% endfor %}
                 </div>
-            </div>
             {% endfor %}
 
             <div class="text-center mb-4">
@@ -52,12 +41,9 @@
                 </a>
             </div>
 
-            <!-- 추가 프로젝트들이 여기에 동적으로 추가됨 -->
             <div id="additional-projects"></div>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-</body>
-</html>
+{% endblock %}
