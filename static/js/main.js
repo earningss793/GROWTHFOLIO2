@@ -11,7 +11,11 @@ document.addEventListener('DOMContentLoaded', function() {
     if (addProjectBtn) {
         addProjectBtn.addEventListener('click', function() {
             const projectSection = createProjectInputSection();
-            additionalProjects.appendChild(projectSection);
+            document.getElementById('additional-projects').appendChild(projectSection);
+            window.scrollTo({
+                top: projectSection.offsetTop,
+                behavior: 'smooth'
+            });
         });
     }
 
