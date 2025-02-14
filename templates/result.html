@@ -7,21 +7,23 @@
             {% for experience in analysis.work_experience %}
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h5 class="mb-0">{{ experience.company }} - {{ experience.team }}</h5>
-                        <small>{{ experience.start_date }} ~ {{ experience.end_date }}</small>
+                        <div class="header-info">
+                            <p class="company-info mb-1">{{ experience.company }} - {{ experience.team }}</p>
+                            <small class="period-info">{{ experience.start_date }} ~ {{ experience.end_date }}</small>
+                        </div>
                     </div>
                     {% for responsibility in experience.responsibilities %}
                         <div class="card-body">
-                            <h6 class="card-subtitle mb-3">{{ responsibility.project }}</h6>
-                            <div class="mb-4">
-                                <strong>업무 내용:</strong>
-                                <ul>
+                            <h2 class="project-title mb-4">{{ responsibility.project }}</h2>
+                            <div class="content-section">
+                                <h3 class="section-title">업무 내용:</h3>
+                                <ul class="content-list">
                                     {% for detail in responsibility.details %}
                                         <li>{{ detail }}</li>
                                     {% endfor %}
                                 </ul>
-                                <strong>성과:</strong>
-                                <ul>
+                                <h3 class="section-title mt-4">성과:</h3>
+                                <ul class="content-list">
                                     {% for result in responsibility.results %}
                                         <li>{{ result }}</li>
                                     {% endfor %}

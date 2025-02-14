@@ -332,6 +332,55 @@ pre {
     padding: 1.5rem;
 }
 
+/* Card Hierarchy Styles */
+.card-header {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid rgba(0,0,0,.125);
+    padding: 1rem 1.25rem;
+}
+
+.header-info {
+    font-size: 0.95rem;
+}
+
+.company-info {
+    color: #4a5568;
+    margin-bottom: 0.25rem;
+}
+
+.period-info {
+    color: #718096;
+}
+
+.project-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-bottom: 1rem;
+}
+
+.content-section {
+    margin-bottom: 2rem;
+}
+
+.content-list {
+    padding-left: 2rem;
+    margin-bottom: 1.5rem;
+}
+
+.content-list li {
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+    color: #4a5568;
+}
+
 /* Template Selection */
 .template-selection {
     background-color: white;

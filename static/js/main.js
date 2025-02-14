@@ -119,17 +119,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function createProjectHTML(result, headerInfo) {
         return `
             <div class="card-header">
-                <h5 class="mb-0">${headerInfo?.title || result.project_name}</h5>
-                <small>${headerInfo?.period || ''}</small>
+                <div class="header-info">
+                    <p class="company-info mb-1">${headerInfo?.title || ''}</p>
+                    <small class="period-info">${headerInfo?.period || ''}</small>
+                </div>
             </div>
             <div class="card-body">
-                <div class="mb-4">
-                    <strong>업무 내용:</strong>
-                    <ul>
+                <h2 class="project-title">${result.project_name}</h2>
+                <div class="content-section">
+                    <h3 class="section-title">업무 내용:</h3>
+                    <ul class="content-list">
                         ${result.details.map(detail => `<li>${detail}</li>`).join('')}
                     </ul>
-                    <strong>성과:</strong>
-                    <ul>
+                    <h3 class="section-title mt-4">성과:</h3>
+                    <ul class="content-list">
                         ${result.results.map(result => `<li>${result}</li>`).join('')}
                     </ul>
                 </div>
