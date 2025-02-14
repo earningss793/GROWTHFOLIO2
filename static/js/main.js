@@ -8,14 +8,63 @@ document.addEventListener('DOMContentLoaded', function() {
     const addProjectBtn = document.getElementById('addProjectBtn');
     const additionalProjects = document.getElementById('additional-projects');
 
-    if (addProjectBtn) {
-        addProjectBtn.addEventListener('click', function() {
-            const projectSection = createProjectInputSection();
-            document.getElementById('additional-projects').appendChild(projectSection);
-            window.scrollTo({
-                top: projectSection.offsetTop,
-                behavior: 'smooth'
-            });
+    const submitProject = document.getElementById('submitProject');
+    const projectModal = new bootstrap.Modal(document.getElementById('projectModal'));
+
+    if (submitProject) {
+        submitProject.addEventListener('click', async function() {
+            const projectName = document.getElementById('projectName').value.trim();
+            if (!projectName) {
+                showAlert('프로젝트명을 입력해주세요.', 'danger');
+                return;
+            }
+
+            submitProject.disabled = true;
+            try {
+                const response = await fetch('/api/projects', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ project_name: projectName })
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    const projectSection = document.createElement('div');
+                    projectSection.className = 'card mb-4';
+                    projectSection.innerHTML = `
+                        <div class="card-header">
+                            <h5 class="mb-0">프로젝트명: ${result.project_name}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-4">
+                                <strong>업무 내용:</strong>
+                                <ul>
+                                    ${result.details.map(detail => `<li>${detail}</li>`).join('')}
+                                </ul>
+                                <strong>성과:</strong>
+                                <ul>
+                                    ${result.results.map(result => `<li>${result}</li>`).join('')}
+                                </ul>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('additional-projects').appendChild(projectSection);
+                    projectModal.hide();
+                    document.getElementById('projectName').value = '';
+                    window.scrollTo({
+                        top: projectSection.offsetTop,
+                        behavior: 'smooth'
+                    });
+                } else {
+                    showAlert(result.error || '프로젝트 추가 중 오류가 발생했습니다.', 'danger');
+                }
+            } catch (error) {
+                showAlert('서버와의 통신 중 오류가 발생했습니다.', 'danger');
+            } finally {
+                submitProject.disabled = false;
+            }
         });
     }
 

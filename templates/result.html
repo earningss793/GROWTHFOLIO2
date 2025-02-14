@@ -33,12 +33,34 @@
             {% endfor %}
 
             <div class="text-center mb-4">
-                <button type="button" class="btn btn-primary" id="addProjectBtn">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#projectModal">
                     프로젝트 추가
                 </button>
                 <a href="{{ url_for('index') }}" class="btn btn-secondary ms-2">
                     새로운 분석 시작
                 </a>
+            </div>
+
+            <!-- 프로젝트 추가 모달 -->
+            <div class="modal fade" id="projectModal" tabindex="-1" aria-labelledby="projectModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="projectModalLabel">새 프로젝트 추가</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="mb-3">
+                                <label for="projectName" class="form-label">프로젝트명</label>
+                                <input type="text" class="form-control" id="projectName" required>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                            <button type="button" class="btn btn-primary" id="submitProject">확인</button>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div id="additional-projects"></div>
