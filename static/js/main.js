@@ -35,12 +35,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         submitProject.disabled = true;
 
-        // Show loading spinner
-        const loadingSpinner = document.createElement('div');
-        loadingSpinner.className = 'spinner-border text-primary mt-3';
-        loadingSpinner.setAttribute('role', 'status');
-        loadingSpinner.innerHTML = '<span class="visually-hidden">Loading...</span>';
-        document.querySelector('.modal-body').appendChild(loadingSpinner);
+        // Show progress bar
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress mt-3';
+        progressBar.innerHTML = `
+            <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                 role="progressbar" 
+                 style="width: 0%">
+            </div>
+        `;
+        document.querySelector('.modal-body').appendChild(progressBar);
 
         try {
             // Get header info from existing content
@@ -69,18 +73,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const result = await response.json();
             if (response.ok) {
+                // Complete progress bar
+                clearInterval(progressInterval);
+                progressElement.style.width = '100%';
+
                 // Create single project section
                 const projectSection = document.createElement('div');
                 projectSection.className = 'card mb-4';
                 projectSection.innerHTML = createProjectHTML(result, headerInfo);
 
-                // Clear existing additional projects and add new one
+                // Replace existing input section or append to additional projects
                 const targetSection = document.getElementById('additional-projects');
-                targetSection.innerHTML = '';
                 targetSection.appendChild(projectSection);
 
                 setTimeout(() => {
-                    loadingSpinner.remove();
+                    progressBar.remove();
                     projectModal.hide();
                     projectNameInput.value = '';
                 }, 500);
