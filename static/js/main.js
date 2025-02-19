@@ -250,11 +250,13 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = true;
             input.disabled = true;
 
+            const requestId = Math.random().toString(36).substring(7);
             try {
                 const response = await fetch('/api/projects', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'X-Request-Id': requestId
                     },
                     body: JSON.stringify({ project_name: projectName })
                 });

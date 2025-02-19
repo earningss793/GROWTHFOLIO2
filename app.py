@@ -94,6 +94,11 @@ def analyze():
 @app.route('/api/projects', methods=['POST'])
 def add_project():
     try:
+        # 중복 요청 방지를 위한 요청 헤더 확인
+        request_id = request.headers.get('X-Request-Id')
+        if not request_id:
+            return jsonify({'error': '요청 ID가 필요합니다.'}), 400
+
         data = request.get_json()
         if not data or 'project_name' not in data:
             return jsonify({'error': '프로젝트명이 필요합니다.'}), 400
