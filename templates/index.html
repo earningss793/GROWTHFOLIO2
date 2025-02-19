@@ -86,8 +86,11 @@
         <div class="glow-background"></div>
     </div>
 
-    <!-- Tally.so 위젯 스크립트 -->
+
+
+    <!-- Step by Step 가이드 추가 -->
     <script async src="https://tally.so/widgets/embed.js"></script>
+
     <script>
     window.TallyConfig = {
       "formId": "mOoL5p",
@@ -181,6 +184,30 @@
                     포트폴리오용 내용으로 생성하기
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- 프로젝트 추가 모달 -->
+    <div class="modal fade" id="addProjectModal" tabindex="-1" aria-labelledby="addProjectModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addProjectModalLabel">새 프로젝트 추가</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="projectForm">
+                        <div class="mb-3">
+                            <label for="projectName" class="form-label">프로젝트명</label>
+                            <input type="text" class="form-control" id="projectName" placeholder="프로젝트명을 입력하세요" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                    <button type="button" class="btn btn-primary" id="submitProject">확인</button>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}

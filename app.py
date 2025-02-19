@@ -17,7 +17,10 @@ app.secret_key = os.urandom(24)
 
 # Configure folders
 UPLOAD_FOLDER = 'uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# Create necessary folders
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 # Initialize Anthropic client
 client = anthropic.Anthropic(
@@ -66,12 +69,18 @@ def analyze():
         if not resume_text:
             return jsonify({'error': '이력서 내용이 비어있습니다.'}), 400
 
+        # Check text length (approximate length for 4 projects)
         if len(resume_text.split()) > 2000:
             return jsonify({
                 'error': '프로젝트/캠페인은 한번에 최대 4개까지 생성 가능합니다. 경력기술 내용이 너무 길다면 프로젝트를 4개씩 끊어서 입력해주세요 :)'
             }), 400
 
+        # Log successful API call
+        logger.info("Claude API 호출 성공")
+
+        # Analyze resume using Claude API
         analysis_result = analyze_resume(client, resume_text)
+
         return render_template('result.html', analysis=analysis_result)
 
     except ValueError as e:
@@ -81,6 +90,7 @@ def analyze():
         logger.error(f"Unexpected error in analyze: {str(e)}")
         return jsonify({'error': '이력서 분석 중 오류가 발생했습니다.'}), 500
 
+## 프로젝트 추가 생성
 @app.route('/api/projects', methods=['POST'])
 def add_project():
     try:
@@ -92,6 +102,7 @@ def add_project():
         if not project_name.strip():
             return jsonify({'error': '유효한 프로젝트명을 입력해주세요.'}), 400
 
+        # Claude API를 사용하여 프로젝트 세부사항 생성
         prompt = f"""다음 프로젝트에 대한 구체적인 업무 내용 5가지와 수치화된 성과 3가지를 생성해주세요:
 
 프로젝트명: {project_name}
@@ -113,30 +124,25 @@ def add_project():
     ]
 }}"""
 
-        try:
-            response = client.messages.create(
-                model="claude-3-5-sonnet-20241022",
-                max_tokens=1000,
-                messages=[{"role": "user", "content": prompt}]
-            )
+        response = client.messages.create(
+            model="claude-3-5-sonnet-20241022",
+            max_tokens=1000,
+            messages=[{"role": "user", "content": prompt}]
+        )
 
-            content = response.content[0].text
-            json_start = content.find('{')
-            json_end = content.rfind('}') + 1
+        # API 응답에서 JSON 추출
+        content = response.content[0].text
+        json_start = content.find('{')
+        json_end = content.rfind('}') + 1
+        if json_start == -1 or json_end == 0:
+            raise ValueError("API 응답을 처리할 수 없습니다")
 
-            if json_start == -1 or json_end == 0:
-                raise ValueError("API 응답을 처리할 수 없습니다")
+        result = json.loads(content[json_start:json_end])
+        return jsonify(result)
 
-            result = json.loads(content[json_start:json_end])
-            return jsonify(result)
-
-        except Exception as e:
-            logger.error(f"API 호출 중 오류 발생: {str(e)}")
-            return jsonify({'error': 'API 호출 중 오류가 발생했습니다.'}), 500
-
+    except json.JSONDecodeError as e:
+        logger.error(f"JSON 파싱 오류: {str(e)}")
+        return jsonify({'error': 'API 응답을 처리할 수 없습니다.'}), 500
     except Exception as e:
         logger.error(f"프로젝트 추가 중 오류 발생: {str(e)}")
         return jsonify({'error': '프로젝트 추가 중 오류가 발생했습니다.'}), 500
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
