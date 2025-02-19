@@ -6,6 +6,7 @@ import logging
 import anthropic
 from anthropic import Anthropic
 
+### 이력서, 경력기술서에서 내용 추출
 def extract_text_from_file(filepath):
     logging.debug(f"Processing file: {filepath}")
 
@@ -29,6 +30,7 @@ def extract_text_from_file(filepath):
     except Exception as e:
         logging.error(f"파일 처리 중 오류 발생: {str(e)}")
         raise
+#PDF에서 내용 추출
 def extract_from_pdf(filepath):
     try:
         text = ""
@@ -41,6 +43,7 @@ def extract_from_pdf(filepath):
         logging.error(f"PDF 파일 처리 중 오류 발생: {str(e)}")
         raise ValueError(f"PDF 파일 처리 중 오류가 발생했습니다: {str(e)}")
 
+#DOCX에서 내용 추출
 def extract_from_docx(filepath):
     try:
         doc = docx.Document(filepath)
@@ -52,6 +55,7 @@ def extract_from_docx(filepath):
         logging.error(f"DOCX 파일 처리 중 오류 발생: {str(e)}")
         raise ValueError(f"DOCX 파일 처리 중 오류가 발생했습니다: {str(e)}")
 
+#txt에서 내용 추출
 def extract_from_txt(filepath):
     try:
         with open(filepath, 'r', encoding='utf-8') as file:
@@ -68,6 +72,7 @@ def extract_from_txt(filepath):
         logging.error(f"텍스트 파일 처리 중 오류 발생: {str(e)}")
         raise ValueError(f"텍스트 파일 처리 중 오류가 발생했습니다: {str(e)}")
 
+# Claude API를 통해 프로젝트 세부사항 생성
 def analyze_resume(client, text_content):
     # the newest Anthropic model is "claude-3-5-sonnet-20241022" which was released October 22, 2024
     prompt = f"""분석할 이력서 내용입니다. 다음 형식에 맞춰 JSON으로 변환해주세요.
@@ -87,16 +92,16 @@ def analyze_resume(client, text_content):
                     {{
                         "project": "프로젝트 1: 앨범 프로모션 컨텐츠",
                         "details": [
-                            "아티스트 앨범 발매에 맞춘 컨텐츠 기획 및 제작.",
-                            "앨범의 타이틀곡에 대한 홍보 영상 제작 및 배포.",
-                            "소셜 미디어용 짧은 숏폼 컨텐츠 제작.",
-                            "앨범 프로모션 관련 행사 자료 시각화 및 디자인.",
-                            "팬들과 소통할 수 있는 디지털 이벤트 기획."
+                            "아티스트 앨범 발매에 맞춘 컨텐츠 기획 및 제작",
+                            "앨범의 타이틀곡에 대한 홍보 영상 제작 및 배포",
+                            "소셜 미디어용 짧은 숏폼 컨텐츠 제작",
+                            "앨범 프로모션 관련 행사 자료 시각화 및 디자인",
+                            "팬들과 소통할 수 있는 디지털 이벤트 기획"
                         ],
                         "results": [
-                            "앨범 프로모션 컨텐츠 조회수 100만 회 기록.",
-                            "SNS 채널 평균 CTR 12.5% 달성.",
-                            "담당 기간 전 대비 앨범 매출 25% 증가."
+                            "앨범 프로모션 컨텐츠 조회수 100만 회 기록",
+                            "SNS 채널 평균 CTR 12.5% 달성",
+                            "담당 기간 전 대비 앨범 매출 25% 증가"
                         ]
                     }}
                 ]
@@ -106,7 +111,7 @@ def analyze_resume(client, text_content):
 
     주의사항:
     1. 각 프로젝트의 업무 내용(details)은 반드시 5개의 구체적인 문장으로 작성해주세요.
-    2. 각 프로젝트의 성과(results)는 반드시 3개의 수치화된 결과로 작성해주세요.
+    2. 각 프로젝트의 성과(results)는 반드시 3개의 수치화된 결과로 작성해주세요.제공되지 않은 수치에 대해서는 임의표기말고 '00%'로 표기해주세요. 
     3. 입력된 내용을 바탕으로 현실적인 수치와 성과를 추정하여 작성해주세요.
     4. 모든 프로젝트를 분리하여 각각 자세히 분석해주세요.
     """
@@ -171,7 +176,7 @@ def analyze_resume(client, text_content):
 
 
 
-# Main execution
+# PPT로 추출하는 함수
 if __name__ == "__main__":
     # API 응답 예시 (실제 API 응답 데이터로 대체 가능)
     api_response_json = {

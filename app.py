@@ -90,6 +90,7 @@ def analyze():
         logger.error(f"Unexpected error in analyze: {str(e)}")
         return jsonify({'error': '이력서 분석 중 오류가 발생했습니다.'}), 500
 
+## 프로젝트 추가 생성
 @app.route('/api/projects', methods=['POST'])
 def add_project():
     try:
