@@ -35,30 +35,27 @@ document.addEventListener('DOMContentLoaded', function() {
 
         submitProject.disabled = true;
 
-        // Show progress bar
-        const progressBar = document.createElement('div');
-        progressBar.className = 'progress mt-3';
-        progressBar.innerHTML = `
-            <div class="progress-bar progress-bar-striped progress-bar-animated" 
-                 role="progressbar" 
-                 style="width: 0%">
-            </div>
-        `;
-        document.querySelector('.modal-body').appendChild(progressBar);
+        // Create and show progress bar
+        const progressContainer = document.createElement('div');
+        progressContainer.className = 'submit-progress';
+        const progressBarInner = document.createElement('div');
+        progressBarInner.className = 'progress-bar-inner';
+        progressContainer.appendChild(progressBarInner);
+        document.querySelector('.modal-body').appendChild(progressContainer);
+        progressContainer.style.display = 'block';
+
+        // Animate progress
+        let progress = 0;
+        const progressInterval = setInterval(() => {
+            if (progress < 90) {
+                progress += 5;
+                progressBarInner.style.width = `${progress}%`;
+            }
+        }, 100);
 
         try {
             // Get header info from existing content
             const headerInfo = getExistingHeaderInfo();
-
-            // Animate progress bar
-            const progressElement = progressBar.querySelector('.progress-bar');
-            let progress = 0;
-            const progressInterval = setInterval(() => {
-                if (progress < 90) {
-                    progress += 10;
-                    progressElement.style.width = `${progress}%`;
-                }
-            }, 300);
 
             const response = await fetch('/api/projects', {
                 method: 'POST',
@@ -75,7 +72,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (response.ok) {
                 // Complete progress bar
                 clearInterval(progressInterval);
-                progressElement.style.width = '100%';
+                progressBarInner.style.width = '100%';
 
                 // Create single project section
                 const projectSection = document.createElement('div');
@@ -87,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 targetSection.appendChild(projectSection);
 
                 setTimeout(() => {
-                    progressBar.remove();
+                    progressContainer.remove();
                     projectModal.hide();
                     projectNameInput.value = '';
                 }, 500);
