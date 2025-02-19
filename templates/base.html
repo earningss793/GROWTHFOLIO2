@@ -8,19 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
     {% block extra_css %}{% endblock %}
     
-    <script async src="https://tally.so/widgets/embed.js"></script>
-    <script>
-    window.TallyConfig = {
-      "formId": "mOoL5p",
-      "popup": {
-        "emoji": {
-          "text": "👋",
-          "animation": "wave"
-        },
-        "hideTitle": true
-      }
-    };
-    </script>
+    
 </head>
 <body>
     {% block content %}{% endblock %}
